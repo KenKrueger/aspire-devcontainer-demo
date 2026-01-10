@@ -111,7 +111,9 @@
 .logo {
   height: 5rem;
   width: auto;
-  transition: transform 300ms ease, filter 300ms ease;
+  transition:
+    transform 300ms ease,
+    filter 300ms ease;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
@@ -241,7 +243,11 @@
   font-size: 2.25rem;
   font-weight: 700;
   line-height: 1;
-  background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--accent-gradient-start) 0%,
+    var(--accent-gradient-end) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -252,7 +258,11 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--accent-gradient-start) 0%,
+    var(--accent-gradient-end) 100%
+  );
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -331,7 +341,11 @@
 }
 
 .toggle-option[aria-pressed="true"] {
-  background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--accent-gradient-start) 0%,
+    var(--accent-gradient-end) 100%
+  );
   color: white;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
@@ -359,7 +373,11 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--accent-gradient-start) 0%,
+    var(--accent-gradient-end) 100%
+  );
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -368,7 +386,10 @@
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    opacity 0.3s ease;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
   min-width: 140px;
   white-space: nowrap;
@@ -422,7 +443,12 @@
 
 .skeleton-row {
   height: 80px;
-  background: linear-gradient(90deg, var(--skeleton-bg-1) 25%, var(--skeleton-bg-2) 50%, var(--skeleton-bg-1) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-bg-1) 25%,
+    var(--skeleton-bg-2) 50%,
+    var(--skeleton-bg-1) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 0.5rem;
@@ -496,7 +522,11 @@
 .temp-value {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--accent-gradient-start) 0%,
+    var(--accent-gradient-end) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -532,7 +562,9 @@
   color: var(--text-secondary);
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.3s ease, border-color 0.3s ease;
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease;
   border-bottom: 2px solid transparent;
   font-size: 0.875rem;
   padding-bottom: 0.125rem;
@@ -635,7 +667,9 @@
   color: var(--text-secondary);
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.3s ease, transform 0.3s ease;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
   border-bottom: 2px solid transparent;
   font-size: 0.875rem;
 }
@@ -665,7 +699,9 @@
 }
 
 .github-link img {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
   filter: brightness(0) invert(1);
 }
 
@@ -674,7 +710,7 @@
     filter: brightness(0) invert(0);
     opacity: 0.7;
   }
-  
+
   .github-link:hover img {
     opacity: 1;
   }
@@ -791,4 +827,3 @@
   outline: 3px solid var(--accent-gradient-end);
   outline-offset: 2px;
 }
-
