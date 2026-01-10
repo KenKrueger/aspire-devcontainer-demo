@@ -5,6 +5,7 @@ var server = builder.AddProject<Projects.app_Server>("server")
     .WithExternalHttpEndpoints();
 
 var webfrontend = builder.AddViteApp("webfrontend", "../frontend")
+    .WithPnpm()
     .WithReference(server)
     .WaitFor(server);
 
