@@ -184,18 +184,18 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-12">
         <header className="flex flex-col gap-6">
           <div className="flex flex-wrap items-center justify-between gap-6">
             <div className="flex flex-col gap-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
                 Tasks
               </p>
-              <h1 className="text-balance text-3xl font-semibold text-slate-900 md:text-4xl">
+              <h1 className="text-balance text-3xl font-semibold text-slate-900 dark:text-slate-100 md:text-4xl">
                 Todo list
               </h1>
-              <p className="max-w-2xl text-base text-slate-600">
+              <p className="max-w-2xl text-base text-slate-600 dark:text-slate-400">
                 Keep track of the essentials. Add, complete, and clear tasks in one place.
               </p>
             </div>
@@ -207,7 +207,7 @@ function App() {
                 disallowEmptySelection
                 selectedKeys={selectedThemeKeys}
                 onSelectionChange={handleThemeChange}
-                className="rounded-xl border border-slate-200 bg-white p-1 shadow-sm"
+                className="rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-700 dark:bg-slate-800"
               >
                 {themeOptions.map((option) => (
                   <ToggleButton
@@ -219,16 +219,20 @@ function App() {
                   </ToggleButton>
                 ))}
               </ToggleButtonGroup>
-              <div className="flex flex-col items-end gap-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm">
-                <span className="font-semibold text-slate-900">{todos.length} items</span>
-                <span className="text-slate-500">{completedCount} completed</span>
+              <div className="flex flex-col items-end gap-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <span className="font-semibold text-slate-900 dark:text-slate-100">
+                  {todos.length} items
+                </span>
+                <span className="text-slate-500 dark:text-slate-400">
+                  {completedCount} completed
+                </span>
               </div>
             </div>
           </div>
         </header>
 
         <main className="flex flex-col gap-6">
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <form className="flex flex-col gap-4" onSubmit={handleCreate}>
               <div className="flex flex-wrap items-end gap-4">
                 <TextField
@@ -243,17 +247,19 @@ function App() {
                   {isSubmitting ? "Adding..." : "Add task"}
                 </Button>
               </div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 Keep titles short so the list stays easy to scan.
               </p>
             </form>
           </section>
 
-          <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex flex-col gap-1">
-                <h2 className="text-lg font-semibold text-slate-900">Todos</h2>
-                <p className="text-sm text-slate-500">Review what needs attention today.</p>
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Todos</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Review what needs attention today.
+                </p>
               </div>
               <Button variant="secondary" onPress={loadTodos} isDisabled={loading}>
                 {loading ? "Refreshing" : "Refresh"}
@@ -262,7 +268,7 @@ function App() {
 
             {error && (
               <div
-                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400"
                 role="alert"
               >
                 {error}
@@ -270,18 +276,18 @@ function App() {
             )}
 
             {loading ? (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
+              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
                 Loading your tasks...
               </div>
             ) : todos.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
+              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
                 No todos yet. Add your first task above.
               </div>
             ) : (
               <GridList
                 aria-label="Todo list"
                 selectionMode="none"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 shadow-sm"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 shadow-sm dark:border-slate-700 dark:bg-slate-900/60"
               >
                 {todos.map((todo) => (
                   <GridListItem id={todo.id} key={todo.id} textValue={todo.title}>
@@ -296,13 +302,17 @@ function App() {
                         <div className="flex flex-col gap-1">
                           <span
                             className={`text-base font-medium ${
-                              todo.isCompleted ? "text-slate-400 line-through" : "text-slate-900"
+                              todo.isCompleted
+                                ? "text-slate-400 dark:text-slate-500 line-through"
+                                : "text-slate-900 dark:text-slate-100"
                             }`}
                           >
                             {todo.title}
                           </span>
                           {todo.notes && (
-                            <span className="text-sm text-slate-500">{todo.notes}</span>
+                            <span className="text-sm text-slate-500 dark:text-slate-400">
+                              {todo.notes}
+                            </span>
                           )}
                         </div>
                       </Checkbox>

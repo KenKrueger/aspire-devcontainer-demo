@@ -10,6 +10,7 @@
 *.userosscache
 *.sln.docstates
 .pnpm-store
+.playwright-mcp
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
