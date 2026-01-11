@@ -81,9 +81,6 @@ function App() {
   const {
     overdueCount,
     dueSoonCount,
-    nextDueTodo,
-    nextDueStatus,
-    nextDueLabel,
     startOfToday,
     soonThreshold,
   } = useMemo(() => {
@@ -94,9 +91,6 @@ function App() {
 
     let overdue = 0;
     let dueSoon = 0;
-    let nextDue: TodoItem | null = null;
-    let nextDueTime = Number.POSITIVE_INFINITY;
-
     for (const todo of openTodos) {
       if (!todo.dueDate) {
         continue;
@@ -112,32 +106,11 @@ function App() {
       } else if (dueTime <= soonWindow.getTime()) {
         dueSoon += 1;
       }
-
-      if (dueTime < nextDueTime) {
-        nextDueTime = dueTime;
-        nextDue = todo;
-      }
-    }
-
-    let status: "overdue" | "soon" | "future" | null = null;
-    let label: string | null = null;
-    if (nextDue && Number.isFinite(nextDueTime)) {
-      if (nextDueTime < dayStart.getTime()) {
-        status = "overdue";
-      } else if (nextDueTime <= soonWindow.getTime()) {
-        status = "soon";
-      } else {
-        status = "future";
-      }
-      label = nextDue.dueDate ? formatDueDate(nextDue.dueDate) : null;
     }
 
     return {
       overdueCount: overdue,
       dueSoonCount: dueSoon,
-      nextDueTodo: nextDue,
-      nextDueStatus: status,
-      nextDueLabel: label,
       startOfToday: dayStart,
       soonThreshold: soonWindow,
     };
@@ -150,14 +123,6 @@ function App() {
   const errorMessage = mutationError ?? loadError;
   const loading = isLoading || refreshing;
   const hasMounted = useRef(false);
-  const openSummaryText =
-    remainingCount === 0
-      ? "All caught up for now."
-      : overdueCount > 0
-        ? `${overdueCount} overdue`
-        : dueSoonCount > 0
-          ? `${dueSoonCount} due soon`
-          : "No deadlines in the next 3 days";
   const openCountTone =
     remainingCount === 0
       ? "text-success"
@@ -174,46 +139,6 @@ function App() {
         : dueSoonCount > 0
           ? "border-[color:var(--accent-border)]"
           : "border-stroke";
-  const nextDueTextTone = nextDueTodo
-    ? nextDueStatus === "overdue"
-      ? "text-danger"
-      : nextDueStatus === "soon"
-        ? "text-[color:var(--accent-strong)]"
-        : "text-ink"
-    : "text-muted";
-  const nextDueCardBorder =
-    nextDueStatus === "overdue"
-      ? "border-[color:var(--danger-border)]"
-      : nextDueStatus === "soon"
-        ? "border-[color:var(--accent-border)]"
-        : "border-stroke";
-  const nextDueSubline = nextDueTodo
-    ? nextDueStatus === "overdue"
-      ? `Overdue: ${nextDueTodo.title}`
-      : nextDueStatus === "soon"
-        ? `Due soon: ${nextDueTodo.title}`
-        : nextDueTodo.title
-    : "Add a due date to shape the pace.";
-  const activeFilterTags = useMemo(() => {
-    const tags: string[] = [];
-
-    if (statusFilter !== "all") {
-      const statusLabel = statusFilter === "open" ? "Open" : "Done";
-      tags.push(`Status: ${statusLabel}`);
-    }
-
-    if (sortFilter === "due") {
-      tags.push("Sort: due date");
-    }
-
-    if (trimmedQuery) {
-      const trimmed =
-        trimmedQuery.length > 24 ? `${trimmedQuery.slice(0, 24)}...` : trimmedQuery;
-      tags.push(`Search: ${trimmed}`);
-    }
-
-    return tags;
-  }, [sortFilter, statusFilter, trimmedQuery]);
 
   useEffect(() => {
     setSearchInput(queryFilter);
@@ -468,19 +393,19 @@ function App() {
   return (
     <div className="app-shell">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6 lg:py-8">
-        <header className="flex flex-col gap-3 app-rise" style={{ animationDelay: "60ms" }}>
+        <header className="relative z-20 flex flex-col gap-3 app-rise" style={{ animationDelay: "60ms" }}>
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-stroke bg-surface px-2.5 py-1 text-[0.6rem] font-medium text-ink shadow-tight">
-                <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_0_2px_var(--accent-glow)] animate-pulse" />
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full border border-stroke bg-gradient-to-r from-surface to-surface-strong px-3 py-1.5 text-[0.65rem] font-semibold text-ink shadow-tight">
+                <span className="h-2 w-2 rounded-full bg-[color:var(--accent)] shadow-[0_0_0_2px_var(--accent-glow)] animate-pulse" />
                 Task Studio
               </span>
-              <span className="text-[0.6rem] text-muted">{todayLabel}</span>
+              <span className="text-[0.65rem] text-muted font-medium">{todayLabel}</span>
             </div>
             <div className="relative group">
               <button
                 type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-stroke bg-surface text-muted transition-all hover:bg-surface-strong hover:text-ink"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-stroke bg-surface text-muted transition-all hover:bg-surface-strong hover:text-ink hover:scale-105 active:scale-95"
                 aria-label="Settings"
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -515,30 +440,24 @@ function App() {
           </div>
 
           {/* Compact stats bar */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className={`inline-flex items-center gap-1.5 rounded-full border ${openCardBorder} bg-surface px-2.5 py-1 shadow-tight transition-all duration-200 hover:shadow-soft cursor-default`}>
-              <span className={`font-display text-base font-semibold tabular-nums ${openCountTone}`}>{remainingCount}</span>
-              <span className="text-[0.6rem] text-muted">open</span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className={`inline-flex items-center gap-1 rounded-md border ${openCardBorder} bg-surface/80 px-2 py-0.5 text-[0.7rem]`}>
+              <span className={`font-semibold tabular-nums ${openCountTone}`}>{remainingCount}</span>
+              <span className="text-muted/70">open</span>
               {overdueCount > 0 && (
-                <span className="ml-0.5 rounded-full bg-[color:var(--danger-soft)] px-1.5 py-0.5 text-[0.55rem] font-medium text-danger animate-pulse">
-                  {overdueCount} overdue
+                <span className="ml-0.5 rounded bg-[color:var(--danger-soft)] px-1 py-0.5 text-[0.55rem] font-medium text-danger">
+                  {overdueCount} late
                 </span>
               )}
             </div>
-            {nextDueTodo && (
-              <div className={`inline-flex items-center gap-1.5 rounded-full border ${nextDueCardBorder} bg-surface px-2.5 py-1 shadow-tight transition-all duration-200 hover:shadow-soft cursor-default`}>
-                <span className="text-[0.6rem] text-muted">Next:</span>
-                <span className={`text-[0.7rem] font-medium ${nextDueTextTone}`}>{nextDueLabel}</span>
-              </div>
-            )}
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-stroke bg-surface px-2.5 py-1 shadow-tight transition-all duration-200 hover:shadow-soft cursor-default">
-              <div className="h-1 w-12 overflow-hidden rounded-full bg-[color:var(--surface-strong)]">
+            <div className="inline-flex items-center gap-1 rounded-md border border-stroke bg-surface/80 px-2 py-0.5">
+              <div className="h-1 w-10 overflow-hidden rounded-full bg-[color:var(--surface-strong)]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[color:var(--accent)] to-[color:var(--accent-strong)] transition-all duration-500"
+                  className="h-full rounded-full bg-[color:var(--accent)] transition-all duration-500"
                   style={{ width: `${completionRate}%` }}
                 />
               </div>
-              <span className="text-[0.6rem] font-medium text-muted">{completionRate}%</span>
+              <span className="text-[0.6rem] tabular-nums text-muted/70">{completionRate}%</span>
             </div>
           </div>
 
@@ -548,7 +467,7 @@ function App() {
           {/* Compact inline compose form */}
           <section className="app-rise" style={{ animationDelay: "100ms" }}>
             <form
-              className="flex flex-col gap-3 rounded-xl border border-[color:var(--accent-border)] bg-gradient-to-r from-[color:var(--accent-soft)] to-surface p-3 shadow-tight transition-all duration-300 hover:shadow-soft focus-within:shadow-soft focus-within:border-[color:var(--accent)] sm:flex-row sm:items-end sm:gap-3"
+              className="flex flex-col gap-2 rounded-xl border border-[color:var(--accent-border)] bg-gradient-to-r from-[color:var(--accent-soft)] to-surface p-3 shadow-tight transition-all duration-300 hover:shadow-soft focus-within:shadow-soft focus-within:border-[color:var(--accent)] sm:flex-row sm:items-end sm:gap-3"
               onSubmit={(e) => {
                 e.preventDefault();
                 createForm.handleSubmit();
@@ -565,7 +484,7 @@ function App() {
                   />
                 )}
               />
-              <div className="flex items-end gap-2 sm:gap-3">
+              <div className="flex items-end gap-2">
                 <createForm.AppField
                   name="dueDate"
                   children={() => (
@@ -574,12 +493,12 @@ function App() {
                       optionalLabel=""
                       aria-label="Due date"
                       type="date"
-                      className="w-[120px] shrink-0"
+                      className="w-[130px] shrink-0"
                     />
                   )}
                 />
                 <createForm.AppForm>
-                  <AppSubmitButton className="h-[38px] px-4 text-[0.6rem] font-semibold uppercase tracking-[0.1em] rounded-lg shadow-tight hover:shadow-soft hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 shrink-0">
+                  <AppSubmitButton className="h-10 px-5 text-[0.6rem] font-semibold uppercase tracking-[0.1em] rounded-lg shadow-tight hover:shadow-soft hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 shrink-0">
                     Add
                   </AppSubmitButton>
                 </createForm.AppForm>
@@ -589,15 +508,15 @@ function App() {
 
           {/* Task list - primary focus */}
           <section
-            className="flex flex-col gap-3 rounded-xl border border-stroke bg-surface/80 backdrop-blur-sm p-3 sm:p-4 shadow-tight app-rise"
+            className="flex flex-col gap-2 rounded-xl border border-stroke bg-surface p-3 shadow-tight app-rise"
             style={{ animationDelay: "140ms" }}
           >
             {/* Compact toolbar */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-ink">Tasks</span>
-                  <span className="rounded-full bg-surface-strong px-2 py-0.5 text-[0.65rem] font-medium text-muted">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[0.8rem] font-medium text-ink">Tasks</span>
+                  <span className="rounded bg-surface-strong px-1.5 py-0.5 text-[0.6rem] font-medium text-muted tabular-nums">
                     {visibleTodos.length}
                   </span>
                 </div>
@@ -608,13 +527,13 @@ function App() {
                     disallowEmptySelection
                     selectedKeys={selectedStatusKeys}
                     onSelectionChange={handleStatusChange}
-                    className="rounded-lg border border-stroke bg-surface-strong px-0.5 py-0.5 shadow-none"
+                    className="rounded-md border border-stroke bg-surface-strong px-0.5 py-0.5 shadow-none"
                   >
                     {statusOptions.map((option) => (
                       <ToggleButton
                         id={option.key}
                         key={option.key}
-                        className="h-6 rounded px-2 text-[0.55rem] font-semibold tracking-[0.08em]"
+                        className="h-5 rounded px-1.5 text-[0.55rem] font-medium"
                       >
                         {option.label}
                       </ToggleButton>
@@ -626,13 +545,13 @@ function App() {
                     disallowEmptySelection
                     selectedKeys={selectedSortKeys}
                     onSelectionChange={handleSortChange}
-                    className="hidden sm:flex rounded-lg border border-stroke bg-surface-strong px-0.5 py-0.5 shadow-none"
+                    className="hidden sm:flex rounded-md border border-stroke bg-surface-strong px-0.5 py-0.5 shadow-none"
                   >
                     {sortOptions.map((option) => (
                       <ToggleButton
                         id={option.key}
                         key={option.key}
-                        className="h-6 rounded px-2 text-[0.55rem] font-semibold tracking-[0.08em]"
+                        className="h-5 rounded px-1.5 text-[0.55rem] font-medium"
                       >
                         {option.label}
                       </ToggleButton>
@@ -642,13 +561,13 @@ function App() {
                     variant="quiet"
                     onPress={refreshTodos}
                     isDisabled={loading}
-                    className="h-7 w-7 rounded-lg p-0 text-muted hover:text-ink"
+                    className="h-6 w-6 rounded p-0 text-muted/60 hover:text-ink"
                     aria-label="Refresh"
                   >
                     {loading ? (
-                      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                     ) : (
-                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                       </svg>
                     )}
@@ -666,7 +585,7 @@ function App() {
 
             {errorMessage && (
               <div
-                className="rounded-lg border border-[color:var(--danger-border)] bg-[color:var(--danger-soft)] px-3 py-2 text-[0.75rem] text-[color:var(--danger)]"
+                className="rounded-md border border-[color:var(--danger-border)] bg-[color:var(--danger-soft)] px-2.5 py-1.5 text-[0.7rem] text-[color:var(--danger)]"
                 role="alert"
               >
                 {errorMessage}
@@ -699,7 +618,7 @@ function App() {
                 <GridList
                   aria-label="Todo list"
                   selectionMode="none"
-                  className="w-full border-transparent bg-transparent shadow-none todo-gridlist grid gap-2"
+                  className="w-full border-transparent bg-transparent shadow-none todo-gridlist grid gap-1.5"
                 >
                   {visibleTodos.map((todo) => {
                     const isActive = activeTodoId === todo.id;
@@ -713,16 +632,16 @@ function App() {
                           dueTime >= startOfToday.getTime() &&
                           dueTime <= soonThreshold.getTime();
                         const badgeClass = todo.isCompleted
-                          ? "text-muted"
+                          ? "text-muted/60"
                           : isOverdue
                             ? "text-[color:var(--danger)]"
                             : isDueSoon
                               ? "text-[color:var(--accent-strong)]"
-                              : "text-muted";
+                              : "text-muted/70";
 
                         dueBadge = (
-                          <span className={`inline-flex items-center gap-1 text-[0.7rem] ${badgeClass}`}>
-                            {isOverdue && <span>⚠️</span>}
+                          <span className={`inline-flex items-center gap-1 text-xs tabular-nums ${badgeClass}`}>
+                            {isOverdue && <span className="text-[0.65rem]">⚠</span>}
                             {formatDueDate(todo.dueDate)}
                           </span>
                         );
@@ -732,9 +651,9 @@ function App() {
                     return (
                       <GridListItem id={todo.id} key={todo.id} textValue={todo.title}>
                         <div
-                          className={`group flex w-full items-center gap-3 rounded-xl border border-stroke bg-surface px-3 py-2.5 transition-all duration-150 hover:border-[color:var(--accent-border)] hover:bg-surface-strong/30 ${
-                            isActive ? "opacity-60" : ""
-                          } ${todo.isCompleted ? "bg-surface-strong/40" : ""}`}
+                          className={`group flex w-full items-center gap-2.5 rounded-lg border border-transparent bg-surface px-2.5 py-2 transition-all duration-150 hover:border-stroke hover:bg-surface-strong/40 ${
+                            isActive ? "opacity-50" : ""
+                          } ${todo.isCompleted ? "bg-surface-strong/30" : ""}`}
                         >
                           <Checkbox
                             name={`todo-${todo.id}`}
@@ -744,8 +663,8 @@ function App() {
                             className="shrink-0"
                           />
                           <span
-                            className={`min-w-0 flex-1 truncate text-sm ${
-                              todo.isCompleted ? "text-muted line-through" : "text-ink"
+                            className={`min-w-0 flex-1 truncate text-[0.8rem] ${
+                              todo.isCompleted ? "text-muted/70 line-through" : "text-ink"
                             }`}
                           >
                             {todo.title}
@@ -756,10 +675,10 @@ function App() {
                               variant="quiet"
                               onPress={() => navigate({ to: `/todos/${todo.id}` })}
                               isDisabled={isActive}
-                              className="h-7 w-7 rounded-lg p-0 text-muted hover:bg-surface-strong hover:text-[color:var(--accent)]"
+                              className="h-6 w-6 rounded p-0 text-muted/60 hover:bg-surface-strong hover:text-[color:var(--accent)]"
                               aria-label="Edit"
                             >
-                              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
                               </svg>
                             </Button>
@@ -767,10 +686,10 @@ function App() {
                               variant="quiet"
                               onPress={() => handleDelete(todo.id)}
                               isDisabled={isActive}
-                              className="h-7 w-7 rounded-lg p-0 text-muted hover:bg-[color:var(--danger-soft)] hover:text-[color:var(--danger)]"
+                              className="h-6 w-6 rounded p-0 text-muted/60 hover:bg-[color:var(--danger-soft)] hover:text-[color:var(--danger)]"
                               aria-label="Delete"
                             >
-                              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                               </svg>
                             </Button>

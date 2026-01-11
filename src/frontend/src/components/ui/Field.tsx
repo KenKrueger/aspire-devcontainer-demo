@@ -23,7 +23,7 @@ export function Label(props: LabelProps) {
     <RACLabel
       {...props}
       className={twMerge(
-        "font-body text-[0.65rem] uppercase tracking-[0.32em] text-muted font-semibold cursor-default w-fit",
+        "font-body text-[0.7rem] text-muted font-medium cursor-default w-fit",
         props.className,
       )}
     />
@@ -71,7 +71,7 @@ export const fieldBorderStyles = tv({
 
 export const fieldGroupStyles = tv({
   extend: focusRing,
-  base: "group flex items-center h-11 box-border bg-[color:var(--surface-raised)] text-ink forced-colors:bg-[Field] border rounded-2xl overflow-hidden transition",
+  base: "group flex items-center h-9 box-border bg-[color:var(--surface-raised)] text-ink forced-colors:bg-[Field] border rounded-lg overflow-hidden transition",
   variants: fieldBorderStyles.variants,
 });
 
@@ -92,7 +92,7 @@ export function Input(props: InputProps) {
       {...props}
       className={composeTailwindRenderProps(
         props.className,
-        "px-3 py-0 min-h-11 flex-1 min-w-0 border-0 outline outline-0 bg-transparent font-body text-sm text-ink placeholder:text-muted disabled:text-muted disabled:placeholder:text-muted [-webkit-tap-highlight-color:transparent]",
+        "px-2.5 py-0 min-h-9 flex-1 min-w-0 border-0 outline outline-0 bg-transparent font-body text-sm text-ink placeholder:text-muted disabled:text-muted disabled:placeholder:text-muted [-webkit-tap-highlight-color:transparent]",
       )}
     />
   );

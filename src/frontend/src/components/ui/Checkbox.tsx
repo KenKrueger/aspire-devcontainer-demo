@@ -17,13 +17,13 @@ const checkboxStyles = tv({
 
 const boxStyles = tv({
   extend: focusRing,
-  base: "w-4.5 h-4.5 box-border shrink-0 rounded-md flex items-center justify-center border transition",
+  base: "w-5 h-5 box-border shrink-0 rounded-md flex items-center justify-center border transition shadow-sm",
   variants: {
     isSelected: {
       false:
-        "bg-[color:var(--surface-raised)] border-[color:var(--stroke)] group-pressed:border-[color:var(--accent-border)]",
+        "bg-[color:var(--surface-raised)] border-[color:var(--stroke)] group-pressed:border-[color:var(--accent-border)] group-hover:border-[color:var(--accent-border)]",
       true:
-        "bg-[color:var(--accent)] border-[color:var(--accent)] group-pressed:bg-[color:var(--accent-strong)] forced-colors:bg-[Highlight] forced-colors:border-[Highlight]",
+        "bg-[color:var(--accent)] border-[color:var(--accent)] group-pressed:bg-[color:var(--accent-strong)] group-hover:brightness-105 forced-colors:bg-[Highlight] forced-colors:border-[Highlight]",
     },
     isInvalid: {
       true:
@@ -37,7 +37,7 @@ const boxStyles = tv({
 });
 
 const iconStyles =
-  "w-3.5 h-3.5 text-[color:var(--accent-contrast)] group-disabled:text-muted forced-colors:text-[HighlightText]";
+  "w-3.5 h-3.5 text-[color:var(--accent-contrast)] group-disabled:text-muted forced-colors:text-[HighlightText] drop-shadow-sm";
 
 export function Checkbox(props: CheckboxProps) {
   return (

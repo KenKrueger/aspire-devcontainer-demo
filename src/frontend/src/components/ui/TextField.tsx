@@ -8,7 +8,7 @@ import { composeTailwindRenderProps, focusRing } from "@/lib/react-aria-utils";
 
 const inputStyles = tv({
   extend: focusRing,
-  base: "border-2 rounded-xl min-h-12 font-body text-base py-0 px-4 box-border bg-surface text-ink transition-all duration-200 placeholder:text-muted/50 hover:border-[color:var(--accent-border)]/50",
+  base: "border-2 rounded-lg min-h-10 font-body text-sm py-0 px-3 box-border bg-surface text-ink transition-all duration-200 placeholder:text-muted/50 hover:border-[color:var(--accent-border)]/50",
   variants: {
     isFocused: fieldBorderStyles.variants.isFocusWithin,
     isInvalid: fieldBorderStyles.variants.isInvalid,
@@ -27,13 +27,15 @@ export function TextField({ label, description, errorMessage, ...props }: TextFi
   return (
     <AriaTextField
       {...props}
-      className={composeTailwindRenderProps(props.className, "flex flex-col gap-2 font-body")}
+      className={composeTailwindRenderProps(props.className, "flex flex-col gap-1 font-body")}
     >
       {label && <Label>{label}</Label>}
       <Input className={inputStyles} />
-      <div className="flex h-4 items-center">
-        {description && <Description>{description}</Description>}
-      </div>
+      {description && (
+        <div className="flex items-center">
+          <Description>{description}</Description>
+        </div>
+      )}
       <FieldError>{errorMessage}</FieldError>
     </AriaTextField>
   );
