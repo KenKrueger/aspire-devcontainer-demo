@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { Button } from "./components/ui/Button";
 import { Checkbox } from "./components/ui/Checkbox";
 import { GridList, GridListItem } from "./components/ui/GridList";
+
 import { ToggleButton } from "./components/ui/ToggleButton";
 import { ToggleButtonGroup } from "./components/ui/ToggleButtonGroup";
 import { SearchField } from "./components/ui/SearchField";
@@ -30,11 +30,6 @@ const statusOptions: Array<{ key: StatusFilter; label: string }> = [
   { key: "all", label: "All" },
   { key: "open", label: "Open" },
   { key: "done", label: "Done" },
-];
-
-const sortOptions: Array<{ key: SortFilter; label: string }> = [
-  { key: "newest", label: "Newest" },
-  { key: "due", label: "Due" },
 ];
 
 const dueDateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -76,7 +71,6 @@ function App() {
 
   const completedCount = useMemo(() => todos.filter((todo) => todo.isCompleted).length, [todos]);
   const remainingCount = todos.length - completedCount;
-  const completionRate = todos.length === 0 ? 0 : Math.round((completedCount / todos.length) * 100);
   const openTodos = useMemo(() => todos.filter((todo) => !todo.isCompleted), [todos]);
   const {
     overdueCount,
@@ -117,8 +111,6 @@ function App() {
   }, [openTodos]);
   const todayLabel = useMemo(() => formatHeaderDate(new Date()), []);
   const selectedThemeKeys = useMemo(() => new Set([theme]), [theme]);
-  const selectedStatusKeys = useMemo(() => new Set([statusFilter]), [statusFilter]);
-  const selectedSortKeys = useMemo(() => new Set([sortFilter]), [sortFilter]);
   const loadError = isError ? "Could not load todos." : null;
   const errorMessage = mutationError ?? loadError;
   const loading = isLoading || refreshing;
@@ -255,34 +247,6 @@ function App() {
     });
   };
 
-  const handleSortChange = (selection: "all" | Iterable<unknown> | unknown) => {
-    const nextValue = (() => {
-      if (selection === "newest" || selection === "due") {
-        return selection;
-      }
-
-      if (selection instanceof Set) {
-        const [value] = Array.from(selection);
-        if (value === "newest" || value === "due") {
-          return value;
-        }
-      }
-
-      return null;
-    })();
-
-    if (!nextValue) {
-      return;
-    }
-
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        sort: nextValue === "newest" ? undefined : "due",
-      }),
-    });
-  };
-
   const refreshTodos = async () => {
     setRefreshing(true);
     setMutationError(null);
@@ -384,22 +348,25 @@ function App() {
 
   return (
     <div className="app-shell">
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-5 py-6 sm:px-8 sm:py-10">
-        <header className="relative z-20 flex flex-col gap-4 app-rise" style={{ animationDelay: "60ms" }}>
-          <div className="flex items-end justify-between">
-            <div className="flex flex-col">
-              <h1 className="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-                Tasks
-              </h1>
-              <span className="text-xs text-muted mt-0.5">{todayLabel}</span>
-            </div>
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-5 py-5 sm:px-8 sm:py-8">
+        <header className="relative z-20 flex items-center justify-between app-rise" style={{ animationDelay: "60ms" }}>
+          <div className="flex items-baseline gap-3">
+            <h1 className="font-display text-xl font-semibold tracking-tight text-ink sm:text-2xl">
+              Tasks
+            </h1>
+            <span className="text-xs text-muted">{todayLabel}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`text-xs tabular-nums ${openCountTone}`}>
+              {remainingCount} open
+            </span>
             <div className="relative group">
               <button
                 type="button"
-                className="flex h-7 w-7 items-center justify-center rounded-md text-muted/50 transition-all hover:text-muted"
+                className="flex h-6 w-6 items-center justify-center rounded text-muted/40 transition-all hover:text-muted"
                 aria-label="Settings"
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 </svg>
@@ -429,17 +396,10 @@ function App() {
               </div>
             </div>
           </div>
-
-          {/* Minimal progress indicator */}
-          <div className="flex items-center gap-3 text-xs">
-            <span className={`tabular-nums font-medium ${openCountTone}`}>{remainingCount} open</span>
-            <div className="flex-1 h-px bg-stroke" />
-            <span className="tabular-nums text-muted/60">{completionRate}%</span>
-          </div>
         </header>
 
-        <main className="flex flex-col gap-3">
-          {/* Minimal compose form */}
+        <main className="flex flex-col gap-4">
+          {/* Compose form */}
           <section className="app-rise" style={{ animationDelay: "100ms" }}>
             <form
               className="flex gap-2 items-center"
@@ -479,75 +439,56 @@ function App() {
             </form>
           </section>
 
-          {/* Divider */}
-          <div className="h-px bg-stroke/60 app-rise" style={{ animationDelay: "120ms" }} />
-
           {/* Task list */}
           <section
-            className="flex flex-col gap-3 app-rise"
-            style={{ animationDelay: "140ms" }}
+            className="flex flex-col gap-2 app-rise"
+            style={{ animationDelay: "120ms" }}
           >
-            {/* Toolbar - inline with search */}
-            <div className="flex items-center gap-3">
-              <SearchField
-                aria-label="Search"
-                placeholder="Search..."
-                value={searchInput}
-                onChange={setSearchInput}
-                className="flex-1 min-w-0"
-              />
-              <div className="flex items-center gap-1 shrink-0">
-                <ToggleButtonGroup
-                  aria-label="Status"
-                  selectionMode="single"
-                  disallowEmptySelection
-                  selectedKeys={selectedStatusKeys}
-                  onSelectionChange={handleStatusChange}
-                  className="rounded border border-stroke bg-surface-strong/50 px-0.5 py-0.5 shadow-none"
-                >
-                  {statusOptions.map((option) => (
-                    <ToggleButton
-                      id={option.key}
-                      key={option.key}
-                      className="h-6 rounded px-2 text-[0.65rem] font-medium"
-                    >
-                      {option.label}
-                    </ToggleButton>
-                  ))}
-                </ToggleButtonGroup>
-                <ToggleButtonGroup
-                  aria-label="Sort"
-                  selectionMode="single"
-                  disallowEmptySelection
-                  selectedKeys={selectedSortKeys}
-                  onSelectionChange={handleSortChange}
-                  className="hidden sm:flex rounded border border-stroke bg-surface-strong/50 px-0.5 py-0.5 shadow-none"
-                >
-                  {sortOptions.map((option) => (
-                    <ToggleButton
-                      id={option.key}
-                      key={option.key}
-                      className="h-6 rounded px-2 text-[0.65rem] font-medium"
-                    >
-                      {option.label}
-                    </ToggleButton>
-                  ))}
-                </ToggleButtonGroup>
-                <Button
-                  variant="quiet"
-                  onPress={refreshTodos}
-                  isDisabled={loading}
-                  className="h-6 w-6 rounded p-0 text-muted/40 hover:text-ink"
+            {/* Compact filter tabs */}
+            <div className="flex items-center gap-2 text-xs sm:text-sm border-b border-stroke/30">
+              <div className="flex items-center">
+                {statusOptions.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => handleStatusChange(option.key)}
+                    className={`relative px-3 py-2.5 transition-colors ${
+                      statusFilter === option.key
+                        ? "text-ink font-medium"
+                        : "text-muted hover:text-ink"
+                    }`}
+                  >
+                    {option.label}
+                    {statusFilter === option.key && (
+                      <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-[color:var(--accent)] rounded-full" />
+                    )}
+                  </button>
+                ))}
+              </div>
+              <div className="flex-1" />
+              <div className="flex items-center gap-1 py-1.5">
+                <SearchField
+                  aria-label="Search"
+                  placeholder="Search..."
+                  value={searchInput}
+                  onChange={setSearchInput}
+                  className="hidden sm:block w-32"
+                />
+                <button
+                  type="button"
+                  onClick={refreshTodos}
+                  disabled={loading}
+                  className="h-8 w-8 rounded-full flex items-center justify-center text-muted/50 hover:text-ink hover:bg-surface-strong/50 transition-colors"
                   aria-label="Refresh"
                 >
                   {loading ? (
-                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    <span className="h-3 w-3 animate-spin rounded-full border-[1.5px] border-current border-t-transparent" />
                   ) : (
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                     </svg>
                   )}
-                </Button>
+                </button>
               </div>
             </div>
 
@@ -615,7 +556,7 @@ function App() {
                     return (
                       <GridListItem id={todo.id} key={todo.id} textValue={todo.title}>
                         <div
-                          className={`group flex w-full items-center gap-3 py-3 transition-colors ${
+                          className={`group flex w-full items-center gap-3 py-3 transition-all ${
                             isActive ? "opacity-50" : ""
                           }`}
                         >
@@ -627,36 +568,36 @@ function App() {
                             className="shrink-0"
                           />
                           <span
-                            className={`min-w-0 flex-1 text-sm ${
-                              todo.isCompleted ? "text-muted/50 line-through" : "text-ink"
+                            className={`min-w-0 flex-1 text-[0.925rem] leading-snug transition-colors ${
+                              todo.isCompleted ? "text-muted/40 line-through decoration-muted/30" : "text-ink"
                             }`}
                           >
                             {todo.title}
                           </span>
                           {dueBadge}
-                          <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                            <Button
-                              variant="quiet"
-                              onPress={() => navigate({ to: `/todos/${todo.id}` })}
-                              isDisabled={isActive}
-                              className="h-7 w-7 rounded-md p-0 text-muted/40 hover:text-ink hover:bg-surface-strong"
+                          <div className="flex shrink-0 items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={() => navigate({ to: `/todos/${todo.id}` })}
+                              disabled={isActive}
+                              className="h-8 w-8 rounded flex items-center justify-center text-muted/30 hover:text-ink hover:bg-surface-strong/60 transition-colors"
                               aria-label="Edit"
                             >
                               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
                               </svg>
-                            </Button>
-                            <Button
-                              variant="quiet"
-                              onPress={() => handleDelete(todo.id)}
-                              isDisabled={isActive}
-                              className="h-7 w-7 rounded-md p-0 text-muted/40 hover:text-[color:var(--danger)] hover:bg-[color:var(--danger-soft)]"
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(todo.id)}
+                              disabled={isActive}
+                              className="h-8 w-8 rounded flex items-center justify-center text-muted/30 hover:text-[color:var(--danger)] hover:bg-[color:var(--danger-soft)] transition-colors"
                               aria-label="Delete"
                             >
                               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                               </svg>
-                            </Button>
+                            </button>
                           </div>
                         </div>
                       </GridListItem>
