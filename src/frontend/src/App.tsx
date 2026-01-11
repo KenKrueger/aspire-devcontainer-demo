@@ -1,38 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useLiveQuery } from "@tanstack/react-db";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "./components/ui/Button";
 import { Checkbox } from "./components/ui/Checkbox";
 import { GridList, GridListItem } from "./components/ui/GridList";
 import { ToggleButton } from "./components/ui/ToggleButton";
 import { ToggleButtonGroup } from "./components/ui/ToggleButtonGroup";
-import { deleteApiTodosById, getApiTodos, patchApiTodosById, postApiTodos } from "./client";
 import { useTheme } from "./lib/theme";
 import { useAppForm } from "./lib/form";
 import { AppTextField, AppSubmitButton } from "./components/form";
-
-type TodoItem = {
-  id: number;
-  title: string;
-  notes: string | null;
-  isCompleted: boolean;
-  sortOrder: number;
-  dueDate: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-const apiBaseUrl = typeof window === "undefined" ? "" : window.location.origin;
-
-const emptyRequest = {
-  title: null,
-  notes: null,
-  dueDate: null,
-  sortOrder: null,
-};
-
-const parseTodos = (data: unknown): TodoItem[] => (Array.isArray(data) ? (data as TodoItem[]) : []);
-
-const parseTodo = (data: unknown): TodoItem | null =>
-  data && typeof data === "object" ? (data as TodoItem) : null;
+import { todoCollection, todosQueryKey, type TodoItem } from "./db/todos";
+import { postApiTodos } from "./client";
 
 type ThemeMode = "light" | "dark" | "system";
 
@@ -43,14 +21,24 @@ const themeOptions: Array<{ key: ThemeMode; label: string }> = [
 ];
 
 function App() {
-  const [todos, setTodos] = useState<TodoItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const [mutationError, setMutationError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [activeTodoId, setActiveTodoId] = useState<number | null>(null);
   const { theme, setTheme } = useTheme();
+  const {
+    data: todos = [],
+    isLoading,
+    isError,
+  } = useLiveQuery((q) =>
+    q.from({ todo: todoCollection }).orderBy(({ todo }) => todo.createdAt, "desc"),
+  );
 
   const completedCount = useMemo(() => todos.filter((todo) => todo.isCompleted).length, [todos]);
   const selectedThemeKeys = useMemo(() => new Set([theme]), [theme]);
+  const loadError = isError ? "Could not load todos." : null;
+  const errorMessage = mutationError ?? loadError;
+  const loading = isLoading || refreshing;
 
   const handleThemeChange = (selection: "all" | Iterable<unknown> | unknown) => {
     if (selection === "light" || selection === "dark" || selection === "system") {
@@ -66,28 +54,18 @@ function App() {
     }
   };
 
-  const loadTodos = async () => {
-    setLoading(true);
-    setError(null);
+  const refreshTodos = async () => {
+    setRefreshing(true);
+    setMutationError(null);
 
     try {
-      const result = await getApiTodos({ baseUrl: apiBaseUrl });
-
-      if (result.error) {
-        throw new Error("Could not load todos.");
-      }
-
-      setTodos(parseTodos(result.data));
+      await queryClient.invalidateQueries({ queryKey: todosQueryKey });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load todos.");
+      setMutationError(err instanceof Error ? err.message : "Could not refresh todos.");
     } finally {
-      setLoading(false);
+      setRefreshing(false);
     }
   };
-
-  useEffect(() => {
-    loadTodos();
-  }, []);
 
   const createForm = useAppForm({
     defaultValues: {
@@ -102,14 +80,16 @@ function App() {
       },
     },
     onSubmit: async ({ value }) => {
-      setError(null);
+      setMutationError(null);
 
       try {
         const result = await postApiTodos({
-          baseUrl: apiBaseUrl,
+          baseUrl: typeof window === "undefined" ? "" : window.location.origin,
           body: {
-            ...emptyRequest,
             title: value.title.trim(),
+            notes: null,
+            dueDate: null,
+            sortOrder: null,
           },
         });
 
@@ -117,46 +97,26 @@ function App() {
           throw new Error("Could not save your todo.");
         }
 
-        const created = parseTodo(result.data);
-        if (created) {
-          setTodos((prev) => [created, ...prev]);
-        } else {
-          await loadTodos();
-        }
+        await queryClient.invalidateQueries({ queryKey: todosQueryKey });
 
         createForm.reset();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not save your todo.");
+        setMutationError(err instanceof Error ? err.message : "Could not save your todo.");
       }
     },
   });
 
   const handleToggle = async (todo: TodoItem, nextValue: boolean) => {
     setActiveTodoId(todo.id);
-    setError(null);
+    setMutationError(null);
 
     try {
-      const result = await patchApiTodosById({
-        baseUrl: apiBaseUrl,
-        path: { id: todo.id },
-        body: {
-          ...emptyRequest,
-          isCompleted: nextValue,
-        },
+      await todoCollection.update(todo.id, (draft) => {
+        draft.isCompleted = nextValue;
+        draft.updatedAt = new Date().toISOString();
       });
-
-      if (result.error) {
-        throw new Error("Could not update this todo.");
-      }
-
-      const updated = parseTodo(result.data);
-      if (updated) {
-        setTodos((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-      } else {
-        await loadTodos();
-      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update this todo.");
+      setMutationError(err instanceof Error ? err.message : "Could not update this todo.");
     } finally {
       setActiveTodoId(null);
     }
@@ -164,21 +124,12 @@ function App() {
 
   const handleDelete = async (todoId: number) => {
     setActiveTodoId(todoId);
-    setError(null);
+    setMutationError(null);
 
     try {
-      const result = await deleteApiTodosById({
-        baseUrl: apiBaseUrl,
-        path: { id: todoId },
-      });
-
-      if (result.error) {
-        throw new Error("Could not delete this todo.");
-      }
-
-      setTodos((prev) => prev.filter((todo) => todo.id !== todoId));
+      await todoCollection.delete(todoId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not delete this todo.");
+      setMutationError(err instanceof Error ? err.message : "Could not delete this todo.");
     } finally {
       setActiveTodoId(null);
     }
@@ -203,7 +154,6 @@ function App() {
             <div className="flex flex-col items-end gap-3">
               <ToggleButtonGroup
                 aria-label="Theme"
-                name="theme"
                 selectionMode="single"
                 disallowEmptySelection
                 selectedKeys={selectedThemeKeys}
@@ -270,17 +220,17 @@ function App() {
                   Review what needs attention today.
                 </p>
               </div>
-              <Button variant="secondary" onPress={loadTodos} isDisabled={loading}>
+              <Button variant="secondary" onPress={refreshTodos} isDisabled={loading}>
                 {loading ? "Refreshing" : "Refresh"}
               </Button>
             </div>
 
-            {error && (
+            {errorMessage && (
               <div
                 className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400"
                 role="alert"
               >
-                {error}
+                {errorMessage}
               </div>
             )}
 

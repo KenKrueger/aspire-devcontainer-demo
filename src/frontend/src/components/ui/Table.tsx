@@ -1,6 +1,5 @@
 "use client";
 import { ArrowUp } from "lucide-react";
-import React from "react";
 import {
   Cell as AriaCell,
   Column as AriaColumn,
@@ -9,18 +8,18 @@ import {
   TableHeader as AriaTableHeader,
   TableBody as AriaTableBody,
   Button,
-  CellProps,
+  type CellProps,
   Collection,
-  ColumnProps,
+  type ColumnProps,
   ColumnResizer,
   Group,
   ResizableTableContainer,
-  RowProps,
-  TableHeaderProps,
-  TableProps as AriaTableProps,
+  type RowProps,
+  type TableHeaderProps,
+  type TableProps as AriaTableProps,
   composeRenderProps,
   useTableOptions,
-  TableBodyProps,
+  type TableBodyProps,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 import { tv } from "tailwind-variants";

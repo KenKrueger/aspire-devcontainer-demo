@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import {
   GridList as AriaGridList,
   GridListItem as AriaGridListItem,

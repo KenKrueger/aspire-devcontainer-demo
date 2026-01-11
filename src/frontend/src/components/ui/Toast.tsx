@@ -1,11 +1,11 @@
 "use client";
-import React, { CSSProperties } from "react";
+import { type CSSProperties } from "react";
 import {
   UNSTABLE_ToastRegion as ToastRegion,
   UNSTABLE_Toast as Toast,
   UNSTABLE_ToastQueue as ToastQueue,
   UNSTABLE_ToastContent as ToastContent,
-  ToastProps,
+  type ToastProps,
   Button,
   Text,
 } from "react-aria-components";

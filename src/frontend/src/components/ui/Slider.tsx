@@ -2,7 +2,7 @@
 import React from "react";
 import {
   Slider as AriaSlider,
-  SliderProps as AriaSliderProps,
+  type SliderProps as AriaSliderProps,
   SliderOutput,
   SliderThumb,
   SliderTrack,

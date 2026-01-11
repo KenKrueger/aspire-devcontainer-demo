@@ -1,12 +1,12 @@
 "use client";
-import React, { ReactNode } from "react";
+import { type ReactNode } from "react";
 import {
   composeRenderProps,
   Radio as RACRadio,
   RadioGroup as RACRadioGroup,
-  RadioGroupProps as RACRadioGroupProps,
-  RadioProps,
-  ValidationResult,
+  type RadioGroupProps as RACRadioGroupProps,
+  type RadioProps,
+  type ValidationResult,
 } from "react-aria-components";
 import { tv } from "tailwind-variants";
 import { Description, FieldError, Label } from "@/components/ui/Field";

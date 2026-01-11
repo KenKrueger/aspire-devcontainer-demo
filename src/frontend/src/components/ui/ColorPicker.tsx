@@ -3,7 +3,7 @@ import React from "react";
 import {
   Button,
   ColorPicker as AriaColorPicker,
-  ColorPickerProps as AriaColorPickerProps,
+  type ColorPickerProps as AriaColorPickerProps,
   DialogTrigger,
 } from "react-aria-components";
 import { ColorSwatch } from "@/components/ui/ColorSwatch";

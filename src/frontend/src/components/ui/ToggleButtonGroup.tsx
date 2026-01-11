@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import {
   composeRenderProps,
   ToggleButtonGroup as RACToggleButtonGroup,

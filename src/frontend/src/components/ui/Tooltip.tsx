@@ -2,7 +2,7 @@
 import React from "react";
 import {
   Tooltip as AriaTooltip,
-  TooltipProps as AriaTooltipProps,
+  type TooltipProps as AriaTooltipProps,
   OverlayArrow,
   composeRenderProps,
 } from "react-aria-components";

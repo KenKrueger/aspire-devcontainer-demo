@@ -1,18 +1,18 @@
 "use client";
 import { ChevronDown } from "lucide-react";
-import React from "react";
+import type { ReactNode } from "react";
 import {
   Select as AriaSelect,
-  SelectProps as AriaSelectProps,
+  type SelectProps as AriaSelectProps,
   Button,
   ListBox,
-  ListBoxItemProps,
+  type ListBoxItemProps,
   SelectValue,
-  ValidationResult,
+  type ValidationResult,
 } from "react-aria-components";
 import { tv } from "tailwind-variants";
 import { Description, FieldError, Label } from "@/components/ui/Field";
-import { DropdownItem, DropdownSection, DropdownSectionProps } from "@/components/ui/ListBox";
+import { DropdownItem, DropdownSection, type DropdownSectionProps } from "@/components/ui/ListBox";
 import { Popover } from "@/components/ui/Popover";
 import { composeTailwindRenderProps, focusRing } from "@/lib/react-aria-utils";
 
@@ -33,7 +33,7 @@ export interface SelectProps<T extends object> extends Omit<AriaSelectProps<T>, 
   description?: string;
   errorMessage?: string | ((validation: ValidationResult) => string);
   items?: Iterable<T>;
-  children: React.ReactNode | ((item: T) => React.ReactNode);
+  children: ReactNode | ((item: T) => ReactNode);
 }
 
 export function Select<T extends object>({

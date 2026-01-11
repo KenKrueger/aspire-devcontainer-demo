@@ -3,7 +3,10 @@
 import { Button, type ButtonProps } from "@/components/ui/Button";
 import { useFormContext } from "@/lib/form-context";
 
-export interface AppSubmitButtonProps extends Omit<ButtonProps, "type" | "isDisabled" | "isPending"> {
+export interface AppSubmitButtonProps extends Omit<
+  ButtonProps,
+  "type" | "isDisabled" | "isPending"
+> {
   /** Text shown while the form is submitting */
   pendingText?: string;
   /** Whether to disable when form cannot submit (default: true) */

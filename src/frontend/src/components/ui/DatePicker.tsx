@@ -1,11 +1,10 @@
 "use client";
 import { CalendarIcon } from "lucide-react";
-import React from "react";
 import {
   DatePicker as AriaDatePicker,
-  DatePickerProps as AriaDatePickerProps,
-  DateValue,
-  ValidationResult,
+  type DatePickerProps as AriaDatePickerProps,
+  type DateValue,
+  type ValidationResult,
 } from "react-aria-components";
 import { Calendar } from "@/components/ui/Calendar";
 import { DateInput } from "@/components/ui/DateField";

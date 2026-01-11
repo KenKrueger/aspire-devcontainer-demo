@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import { TextField as AriaTextField } from "react-aria-components";
 import type { TextFieldProps as AriaTextFieldProps, ValidationResult } from "react-aria-components";
 import { tv } from "tailwind-variants";

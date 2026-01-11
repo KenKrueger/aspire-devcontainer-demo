@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import {
   Tab as RACTab,
   TabList as RACTabList,
@@ -7,11 +6,11 @@ import {
   TabPanel as RACTabPanel,
   Tabs as RACTabs,
   SelectionIndicator,
-  TabListProps,
-  TabPanelProps,
-  TabPanelsProps,
-  TabProps,
-  TabsProps,
+  type TabListProps,
+  type TabPanelProps,
+  type TabPanelsProps,
+  type TabProps,
+  type TabsProps,
   composeRenderProps,
 } from "react-aria-components";
 import { tv } from "tailwind-variants";

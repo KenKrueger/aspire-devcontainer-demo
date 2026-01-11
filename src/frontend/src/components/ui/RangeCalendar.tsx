@@ -1,12 +1,11 @@
 "use client";
-import React from "react";
 import {
   RangeCalendar as AriaRangeCalendar,
-  RangeCalendarProps as AriaRangeCalendarProps,
+  type RangeCalendarProps as AriaRangeCalendarProps,
   CalendarCell,
   CalendarGrid,
   CalendarGridBody,
-  DateValue,
+  type DateValue,
   Text,
 } from "react-aria-components";
 import { tv } from "tailwind-variants";

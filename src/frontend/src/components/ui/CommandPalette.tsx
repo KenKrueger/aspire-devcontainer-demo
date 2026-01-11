@@ -1,16 +1,15 @@
 "use client";
 import {
   Autocomplete as AriaAutocomplete,
-  AutocompleteProps as AriaAutocompleteProps,
-  MenuProps as AriaMenuProps,
+  type AutocompleteProps as AriaAutocompleteProps,
+  type MenuProps as AriaMenuProps,
   useFilter,
   Dialog,
 } from "react-aria-components";
 import { Menu } from "@/components/ui/Menu";
 import { SearchField } from "@/components/ui/SearchField";
 import { Modal } from "@/components/ui/Modal";
-import React, { useEffect } from "react";
-
+import { useEffect } from "react";
 export interface CommandPaletteProps<T extends object>
   extends Omit<AriaAutocompleteProps, "children">, AriaMenuProps<T> {
   isOpen: boolean;

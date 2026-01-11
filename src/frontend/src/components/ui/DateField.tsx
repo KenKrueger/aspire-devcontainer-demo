@@ -1,13 +1,12 @@
 "use client";
-import React from "react";
 import {
   DateField as AriaDateField,
-  DateFieldProps as AriaDateFieldProps,
+  type DateFieldProps as AriaDateFieldProps,
   DateInput as AriaDateInput,
-  DateInputProps,
+  type DateInputProps,
   DateSegment,
-  DateValue,
-  ValidationResult,
+  type DateValue,
+  type ValidationResult,
 } from "react-aria-components";
 import { tv } from "tailwind-variants";
 import { Description, FieldError, Label, fieldGroupStyles } from "@/components/ui/Field";

@@ -1,8 +1,7 @@
 "use client";
-import React from "react";
 import {
   ColorSlider as AriaColorSlider,
-  ColorSliderProps as AriaColorSliderProps,
+  type ColorSliderProps as AriaColorSliderProps,
   SliderOutput,
   SliderTrack,
 } from "react-aria-components";
