@@ -4,9 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Checkbox } from "./components/ui/Checkbox";
 import { GridList, GridListItem } from "./components/ui/GridList";
-
-import { ToggleButton } from "./components/ui/ToggleButton";
-import { ToggleButtonGroup } from "./components/ui/ToggleButtonGroup";
 import { SearchField } from "./components/ui/SearchField";
 import { useTheme } from "./lib/theme";
 import { useAppForm } from "./lib/form";
@@ -60,6 +57,7 @@ function App() {
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTodoId, setActiveTodoId] = useState<number | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const {
     data: todos = [],
@@ -110,7 +108,6 @@ function App() {
     };
   }, [openTodos]);
   const todayLabel = useMemo(() => formatHeaderDate(new Date()), []);
-  const selectedThemeKeys = useMemo(() => new Set([theme]), [theme]);
   const loadError = isError ? "Could not load todos." : null;
   const errorMessage = mutationError ?? loadError;
   const loading = isLoading || refreshing;
@@ -204,20 +201,6 @@ function App() {
       return Date.parse(b.createdAt) - Date.parse(a.createdAt);
     });
   }, [sortFilter, statusFilter, todos, trimmedQuery]);
-
-  const handleThemeChange = (selection: "all" | Iterable<unknown> | unknown) => {
-    if (selection === "light" || selection === "dark" || selection === "system") {
-      setTheme(selection);
-      return;
-    }
-
-    if (selection instanceof Set) {
-      const [nextValue] = Array.from(selection);
-      if (nextValue === "light" || nextValue === "dark" || nextValue === "system") {
-        setTheme(nextValue);
-      }
-    }
-  };
 
   const handleStatusChange = (selection: "all" | Iterable<unknown> | unknown) => {
     const nextValue = (() => {
@@ -360,40 +343,67 @@ function App() {
             <span className={`text-xs tabular-nums ${openCountTone}`}>
               {remainingCount} open
             </span>
-            <div className="relative group">
+            <div className="relative">
               <button
                 type="button"
-                className="flex h-6 w-6 items-center justify-center rounded text-muted/40 transition-all hover:text-muted"
+                onClick={() => setSettingsOpen(!settingsOpen)}
+                className="flex h-8 w-8 items-center justify-center rounded-md text-muted/50 transition-all hover:text-muted hover:bg-surface-strong/50"
                 aria-label="Settings"
+                aria-expanded={settingsOpen}
               >
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 </svg>
               </button>
-              <div className="absolute right-0 top-full mt-1 z-50 hidden group-hover:block">
-                <div className="rounded-md border border-stroke bg-surface p-2 shadow-tight">
-                  <span className="block mb-1 text-[0.6rem] uppercase tracking-widest text-muted/60">Theme</span>
-                  <ToggleButtonGroup
-                    aria-label="Theme"
-                    selectionMode="single"
-                    disallowEmptySelection
-                    selectedKeys={selectedThemeKeys}
-                    onSelectionChange={handleThemeChange}
-                    className="rounded border border-stroke bg-surface-strong px-0.5 py-0.5 shadow-none"
-                  >
-                    {themeOptions.map((option) => (
-                      <ToggleButton
-                        id={option.key}
-                        key={option.key}
-                        className="h-5 rounded px-2 text-[0.55rem] font-medium"
-                      >
-                        {option.label}
-                      </ToggleButton>
-                    ))}
-                  </ToggleButtonGroup>
-                </div>
-              </div>
+              {settingsOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setSettingsOpen(false)}
+                    aria-hidden="true"
+                  />
+                  <div className="absolute right-0 top-full mt-2 z-50">
+                    <div className="rounded-lg border border-stroke bg-surface p-3 shadow-tight min-w-[140px]">
+                      <span className="block mb-2 text-[0.65rem] uppercase tracking-widest text-muted/60 font-medium">Theme</span>
+                      <div className="flex flex-col gap-1">
+                        {themeOptions.map((option) => (
+                          <button
+                            key={option.key}
+                            type="button"
+                            onClick={() => {
+                              setTheme(option.key);
+                              setSettingsOpen(false);
+                            }}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                              theme === option.key
+                                ? "bg-[color:var(--accent-soft)] text-[color:var(--accent)]"
+                                : "text-ink hover:bg-surface-strong"
+                            }`}
+                          >
+                            {option.key === "light" && (
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                              </svg>
+                            )}
+                            {option.key === "dark" && (
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                              </svg>
+                            )}
+                            {option.key === "system" && (
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
+                              </svg>
+                            )}
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>
@@ -402,7 +412,7 @@ function App() {
           {/* Compose form */}
           <section className="app-rise" style={{ animationDelay: "100ms" }}>
             <form
-              className="flex gap-2 items-center"
+              className="flex gap-3 items-center"
               onSubmit={(e) => {
                 e.preventDefault();
                 createForm.handleSubmit();
@@ -424,12 +434,12 @@ function App() {
                   <AppTextField
                     aria-label="Due date"
                     type="date"
-                    className="w-[130px] shrink-0 hidden sm:block"
+                    className="w-[140px] shrink-0 hidden sm:block"
                   />
                 )}
               />
               <createForm.AppForm>
-                <AppSubmitButton className="h-10 px-4 text-xs font-medium rounded-md shrink-0">
+                <AppSubmitButton className="h-10 px-5 text-xs font-medium rounded-md shrink-0 ml-1">
                   <span className="hidden sm:inline">Add</span>
                   <svg className="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -452,7 +462,7 @@ function App() {
                     key={option.key}
                     type="button"
                     onClick={() => handleStatusChange(option.key)}
-                    className={`relative px-3 py-2.5 transition-colors ${
+                    className={`relative px-4 py-3 text-sm transition-colors ${
                       statusFilter === option.key
                         ? "text-ink font-medium"
                         : "text-muted hover:text-ink"
@@ -460,25 +470,25 @@ function App() {
                   >
                     {option.label}
                     {statusFilter === option.key && (
-                      <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-[color:var(--accent)] rounded-full" />
+                      <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[color:var(--accent)] rounded-full" />
                     )}
                   </button>
                 ))}
               </div>
               <div className="flex-1" />
-              <div className="flex items-center gap-1 py-1.5">
+              <div className="flex items-center gap-2 py-1.5">
                 <SearchField
                   aria-label="Search"
                   placeholder="Search..."
                   value={searchInput}
                   onChange={setSearchInput}
-                  className="hidden sm:block w-32"
+                  className="w-28 sm:w-44"
                 />
                 <button
                   type="button"
                   onClick={refreshTodos}
                   disabled={loading}
-                  className="h-8 w-8 rounded-full flex items-center justify-center text-muted/50 hover:text-ink hover:bg-surface-strong/50 transition-colors"
+                  className="h-9 w-9 rounded-full flex items-center justify-center text-muted/50 hover:text-ink hover:bg-surface-strong/50 transition-colors"
                   aria-label="Refresh"
                 >
                   {loading ? (
@@ -567,13 +577,16 @@ function App() {
                             isDisabled={isActive}
                             className="shrink-0"
                           />
-                          <span
-                            className={`min-w-0 flex-1 text-[0.925rem] leading-snug transition-colors ${
+                          <button
+                            type="button"
+                            onClick={() => !isActive && handleToggle(todo, !todo.isCompleted)}
+                            disabled={isActive}
+                            className={`min-w-0 flex-1 text-left text-[0.925rem] leading-snug transition-colors cursor-pointer hover:opacity-80 ${
                               todo.isCompleted ? "text-muted/40 line-through decoration-muted/30" : "text-ink"
                             }`}
                           >
                             {todo.title}
-                          </span>
+                          </button>
                           {dueBadge}
                           <div className="flex shrink-0 items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                             <button

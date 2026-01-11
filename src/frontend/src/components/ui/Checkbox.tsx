@@ -17,7 +17,7 @@ const checkboxStyles = tv({
 
 const boxStyles = tv({
   extend: focusRing,
-  base: "w-[18px] h-[18px] box-border shrink-0 rounded flex items-center justify-center border transition-colors",
+  base: "w-[22px] h-[22px] box-border shrink-0 rounded flex items-center justify-center border-2 transition-colors",
   variants: {
     isSelected: {
       false:
@@ -37,7 +37,7 @@ const boxStyles = tv({
 });
 
 const iconStyles =
-  "w-3 h-3 text-[color:var(--accent-contrast)] group-disabled:text-[color:var(--muted)] forced-colors:text-[HighlightText]";
+  "w-3.5 h-3.5 text-[color:var(--accent-contrast)] group-disabled:text-[color:var(--muted)] forced-colors:text-[HighlightText]";
 
 export function Checkbox(props: CheckboxProps) {
   return (
