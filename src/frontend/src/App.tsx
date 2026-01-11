@@ -1,12 +1,13 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "./components/ui/Button";
 import { Checkbox } from "./components/ui/Checkbox";
 import { GridList, GridListItem } from "./components/ui/GridList";
-import { TextField } from "./components/ui/TextField";
 import { ToggleButton } from "./components/ui/ToggleButton";
 import { ToggleButtonGroup } from "./components/ui/ToggleButtonGroup";
 import { deleteApiTodosById, getApiTodos, patchApiTodosById, postApiTodos } from "./client";
 import { useTheme } from "./lib/theme";
+import { useAppForm } from "./lib/form";
+import { AppTextField, AppSubmitButton } from "./components/form";
 
 type TodoItem = {
   id: number;
@@ -45,8 +46,6 @@ function App() {
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [newTitle, setNewTitle] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTodoId, setActiveTodoId] = useState<number | null>(null);
   const { theme, setTheme } = useTheme();
 
@@ -90,45 +89,47 @@ function App() {
     loadTodos();
   }, []);
 
-  const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const createForm = useAppForm({
+    defaultValues: {
+      title: "",
+    },
+    validators: {
+      onChange: ({ value }) => {
+        if (!value.title.trim()) {
+          return { fields: { title: "Enter a title before adding a task." } };
+        }
+        return undefined;
+      },
+    },
+    onSubmit: async ({ value }) => {
+      setError(null);
 
-    const trimmed = newTitle.trim();
-    if (!trimmed) {
-      setError("Enter a title before adding a task.");
-      return;
-    }
+      try {
+        const result = await postApiTodos({
+          baseUrl: apiBaseUrl,
+          body: {
+            ...emptyRequest,
+            title: value.title.trim(),
+          },
+        });
 
-    setIsSubmitting(true);
-    setError(null);
+        if (result.error) {
+          throw new Error("Could not save your todo.");
+        }
 
-    try {
-      const result = await postApiTodos({
-        baseUrl: apiBaseUrl,
-        body: {
-          ...emptyRequest,
-          title: trimmed,
-        },
-      });
+        const created = parseTodo(result.data);
+        if (created) {
+          setTodos((prev) => [created, ...prev]);
+        } else {
+          await loadTodos();
+        }
 
-      if (result.error) {
-        throw new Error("Could not save your todo.");
+        createForm.reset();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Could not save your todo.");
       }
-
-      const created = parseTodo(result.data);
-      if (created) {
-        setTodos((prev) => [created, ...prev]);
-      } else {
-        await loadTodos();
-      }
-
-      setNewTitle("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save your todo.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+  });
 
   const handleToggle = async (todo: TodoItem, nextValue: boolean) => {
     setActiveTodoId(todo.id);
@@ -233,19 +234,27 @@ function App() {
 
         <main className="flex flex-col gap-6">
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <form className="flex flex-col gap-4" onSubmit={handleCreate}>
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                createForm.handleSubmit();
+              }}
+            >
               <div className="flex flex-wrap items-end gap-4">
-                <TextField
-                  aria-label="Todo title"
+                <createForm.AppField
                   name="title"
-                  value={newTitle}
-                  onChange={setNewTitle}
-                  placeholder="Add a task"
-                  className="min-w-[240px] flex-1"
+                  children={() => (
+                    <AppTextField
+                      aria-label="Todo title"
+                      placeholder="Add a task"
+                      className="min-w-[240px] flex-1"
+                    />
+                  )}
                 />
-                <Button type="submit" isDisabled={isSubmitting}>
-                  {isSubmitting ? "Adding..." : "Add task"}
-                </Button>
+                <createForm.AppForm>
+                  <AppSubmitButton>Add task</AppSubmitButton>
+                </createForm.AppForm>
               </div>
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 Keep titles short so the list stays easy to scan.
