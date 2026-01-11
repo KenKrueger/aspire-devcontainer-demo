@@ -112,14 +112,6 @@ function App() {
   const errorMessage = mutationError ?? loadError;
   const loading = isLoading || refreshing;
   const hasMounted = useRef(false);
-  const openCountTone =
-    remainingCount === 0
-      ? "text-success"
-      : overdueCount > 0
-        ? "text-danger"
-        : dueSoonCount > 0
-          ? "text-[color:var(--accent-strong)]"
-          : "text-ink";
 
   useEffect(() => {
     setSearchInput(queryFilter);
@@ -340,7 +332,15 @@ function App() {
             <span className="text-[0.7rem] text-muted/70 tracking-wide uppercase">{todayLabel}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className={`text-[0.65rem] uppercase tracking-wider font-medium px-2 py-1 rounded-full bg-surface-strong/60 ${openCountTone}`}>
+            <span className={`text-[0.7rem] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-full ${
+              remainingCount === 0 
+                ? "bg-[color:var(--success-soft)] text-[color:var(--success)]"
+                : overdueCount > 0
+                  ? "bg-[color:var(--danger-soft)] text-[color:var(--danger)]"
+                  : dueSoonCount > 0
+                    ? "bg-[color:var(--accent-soft)] text-[color:var(--accent-strong)]"
+                    : "bg-[color:var(--accent-soft)] text-[color:var(--accent)]"
+            }`}>
               {remainingCount} open
             </span>
             <div className="relative">
@@ -412,7 +412,7 @@ function App() {
           {/* Compose form */}
           <section className="app-rise" style={{ animationDelay: "100ms" }}>
             <form
-              className="flex gap-3 items-center p-3 -mx-3 rounded-xl bg-surface/50 border border-stroke/20"
+              className="flex gap-3 items-center p-3 -mx-3 rounded-xl bg-surface-strong/20"
               onSubmit={(e) => {
                 e.preventDefault();
                 createForm.handleSubmit();
@@ -456,16 +456,16 @@ function App() {
           >
             {/* Filter pills */}
             <div className="flex items-center gap-2 text-xs sm:text-sm">
-              <div className="flex items-center gap-1.5 p-1 rounded-lg bg-surface-strong/50">
+              <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-surface-strong/30">
                 {statusOptions.map((option) => (
                   <button
                     key={option.key}
                     type="button"
                     onClick={() => handleStatusChange(option.key)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all ${
                       statusFilter === option.key
-                        ? "bg-[color:var(--accent)] text-white shadow-sm"
-                        : "text-muted hover:text-ink hover:bg-surface/80"
+                        ? "bg-[color:var(--accent)] text-white shadow-md"
+                        : "text-muted hover:text-ink"
                     }`}
                   >
                     {option.label}
@@ -577,7 +577,7 @@ function App() {
                     return (
                       <GridListItem id={todo.id} key={todo.id} textValue={todo.title}>
                         <div
-                          className={`group flex w-full items-center gap-3 py-3.5 px-2 -mx-2 rounded-lg transition-all hover:bg-surface-strong/40 ${
+                          className={`group flex w-full items-center gap-3 py-2.5 px-2 -mx-2 rounded-lg transition-all hover:bg-surface-strong/40 ${
                             isActive ? "opacity-50" : ""
                           }`}
                         >
@@ -592,7 +592,7 @@ function App() {
                             type="button"
                             onClick={() => !isActive && handleToggle(todo, !todo.isCompleted)}
                             disabled={isActive}
-                            className={`min-w-0 flex-1 text-left text-[0.925rem] leading-snug transition-colors cursor-pointer hover:opacity-80 ${
+                            className={`min-w-0 flex-1 text-left text-[0.875rem] leading-snug transition-colors cursor-pointer hover:opacity-80 ${
                               todo.isCompleted ? "text-muted/40 line-through decoration-muted/30" : "text-ink"
                             }`}
                           >
