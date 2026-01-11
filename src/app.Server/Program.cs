@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
@@ -9,6 +12,8 @@ builder.Services.AddProblemDetails();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.AddSqlServerDbContext<TodoDbContext>("database");
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -17,33 +22,25 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
+    app.MapGet("/scalar", () => Results.Redirect("/scalar/v1"));
 }
-
-
-string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
-
-var api = app.MapGroup("/api");
-api.MapGet("weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
 
 app.MapDefaultEndpoints();
 
+await EnsureDatabaseCreatedAsync(app.Services);
+
+app.MapTodosApi();
+
 app.UseFileServer();
 
-app.Run();
+await app.RunAsync();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+static async Task EnsureDatabaseCreatedAsync(IServiceProvider services)
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    using var scope = services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
+    await dbContext.Database.EnsureCreatedAsync();
 }
+
+public partial class Program;

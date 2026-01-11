@@ -1,6 +1,8 @@
 <Solution>
   <Project Path="app.AppHost/app.AppHost.csproj" />
   <Project Path="app.Server/app.Server.csproj" />
+  <Project Path="app.AppHost.Tests/app.AppHost.Tests.csproj" />
+  <Project Path="app.Server.Tests/app.Server.Tests.csproj" />
   <Project Path="frontend/frontend.esproj">
     <Build />
   </Project>

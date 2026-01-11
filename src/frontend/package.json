@@ -10,13 +10,15 @@
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "openapi-ts": "node -e \"if(!process.env.OPENAPI_URL){console.error('OPENAPI_URL is required');process.exit(1)}\" && openapi-ts -i \"$OPENAPI_URL\" -o src/client -c @hey-api/client-fetch"
   },
   "dependencies": {
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "0.64.2",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
