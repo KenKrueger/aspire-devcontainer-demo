@@ -11,11 +11,14 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "preview": "vite preview",
-    "openapi-ts": "node -e \"if(!process.env.OPENAPI_URL){console.error('OPENAPI_URL is required');process.exit(1)}\" && openapi-ts -i \"$OPENAPI_URL\" -o src/client -c @hey-api/client-fetch"
+    "openapi-ts": "node -e \"if(!process.env.OPENAPI_URL){console.error('OPENAPI_URL is required');process.exit(1)}\" && openapi-ts -i \"$OPENAPI_URL\" -o src/client -c @hey-api/client-fetch",
+    "aspire": "cd ../app.AppHost && aspire run"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
     "react": "^19.2.1",
-    "react-dom": "^19.2.1"
+    "react-dom": "^19.2.1",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.64.2",

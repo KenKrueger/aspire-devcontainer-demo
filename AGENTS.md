@@ -1,6 +1,6 @@
-# Copilot instructions
+# Agent instructions
 
-This repository is set up to use Aspire. Aspire is an orchestrator for the entire application and will take care of configuring dependencies, building, and running the application. The resources that make up the application are defined in `apphost.cs` including application code and external dependencies.
+This repository is set up to use Aspire. Aspire is an orchestrator for the entire application and will take care of configuring dependencies, building, and running the application. The resources that make up the application are defined in `AppHost.cs` including application code and external dependencies.
 
 ## General recommendations for working with Aspire
 1. Before making any changes always run the apphost using `aspire run` and inspect the state of resources to make sure you are building from a known state.
@@ -15,7 +15,16 @@ To run the application run the following command:
 aspire run
 ```
 
-If there is already an instance of the application running it will prompt to stop the existing instance. You only need to restart the application if code in `apphost.cs` is changed, but if you experience problems it can be useful to reset everything to the starting state.
+You can also run `pnpm aspire` from `src/frontend` (it runs `aspire run` in `src/app.AppHost`). If there is already an instance of the application running it will prompt to stop the existing instance. You only need to restart the application if code in `AppHost.cs` is changed, but if you experience problems it can be useful to reset everything to the starting state.
+
+If Aspire MCP tools report no running AppHost, re-run `aspire run` in the AppHost directory in the foreground and use CLI logs to confirm endpoints before trying MCP again.
+
+## Repo layout quick notes
+- Solution entry: `src/app.slnx`.
+- AppHost: `src/app.AppHost/AppHost.cs` (resources include SQL Server, `clientgen`, `webfrontend`).
+- API project: `src/app.Server` with TODO endpoints in `TodosApi.cs` and Scalar UI at `/scalar/v1` in development.
+- Tests: `src/app.AppHost.Tests` (AppHost integration) and `src/app.Server.Tests` (API + Testcontainers).
+- OpenAPI client generation: `pnpm openapi-ts` in `src/frontend` (requires `OPENAPI_URL`).
 
 ## Checking resources
 To check the status of resources defined in the app model use the _list resources_ tool. This will show you the current state of each resource and if there are any issues. If a resource is not running as expected you can use the _execute resource command_ tool to restart it or perform other actions.

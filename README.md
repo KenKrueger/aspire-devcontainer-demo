@@ -14,6 +14,7 @@ Generate the TypeScript client (requires `aspire run` so the OpenAPI endpoint is
 
 ```
 cd src/frontend
+pnpm aspire
 OPENAPI_URL="https://<server-endpoint>/openapi/v1.json" pnpm openapi-ts
 ```
 

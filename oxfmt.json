@@ -1,0 +1,7 @@
+{
+  "experimentalSortImports": {},
+  "experimentalSortPackageJson": true,
+  "experimentalTailwindcss": {
+    "stylesheet": "./src/frontend/src/App.css"
+  }
+}
