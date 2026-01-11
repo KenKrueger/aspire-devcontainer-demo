@@ -331,16 +331,16 @@ function App() {
 
   return (
     <div className="app-shell">
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-5 py-5 sm:px-8 sm:py-8">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-4 sm:gap-5 sm:px-8 sm:py-8">
         <header className="relative z-20 flex items-center justify-between app-rise" style={{ animationDelay: "60ms" }}>
-          <div className="flex items-baseline gap-3">
-            <h1 className="font-display text-xl font-semibold tracking-tight text-ink sm:text-2xl">
+          <div className="flex flex-col">
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
               Tasks
             </h1>
-            <span className="text-xs text-muted">{todayLabel}</span>
+            <span className="text-[0.7rem] text-muted/70 tracking-wide uppercase">{todayLabel}</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className={`text-xs tabular-nums ${openCountTone}`}>
+          <div className="flex items-center gap-2">
+            <span className={`text-[0.65rem] uppercase tracking-wider font-medium px-2 py-1 rounded-full bg-surface-strong/60 ${openCountTone}`}>
               {remainingCount} open
             </span>
             <div className="relative">
@@ -412,7 +412,7 @@ function App() {
           {/* Compose form */}
           <section className="app-rise" style={{ animationDelay: "100ms" }}>
             <form
-              className="flex gap-3 items-center"
+              className="flex gap-3 items-center p-3 -mx-3 rounded-xl bg-surface/50 border border-stroke/20"
               onSubmit={(e) => {
                 e.preventDefault();
                 createForm.handleSubmit();
@@ -454,24 +454,21 @@ function App() {
             className="flex flex-col gap-2 app-rise"
             style={{ animationDelay: "120ms" }}
           >
-            {/* Compact filter tabs */}
-            <div className="flex items-center gap-2 text-xs sm:text-sm border-b border-stroke/30">
-              <div className="flex items-center">
+            {/* Filter pills */}
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <div className="flex items-center gap-1.5 p-1 rounded-lg bg-surface-strong/50">
                 {statusOptions.map((option) => (
                   <button
                     key={option.key}
                     type="button"
                     onClick={() => handleStatusChange(option.key)}
-                    className={`relative px-4 py-3 text-sm transition-colors ${
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                       statusFilter === option.key
-                        ? "text-ink font-medium"
-                        : "text-muted hover:text-ink"
+                        ? "bg-[color:var(--accent)] text-white shadow-sm"
+                        : "text-muted hover:text-ink hover:bg-surface/80"
                     }`}
                   >
                     {option.label}
-                    {statusFilter === option.key && (
-                      <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[color:var(--accent)] rounded-full" />
-                    )}
                   </button>
                 ))}
               </div>
@@ -512,20 +509,34 @@ function App() {
             )}
 
             {loading ? (
-              <div className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-stroke bg-surface-strong px-4 py-8 text-center">
+              <div className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-stroke/50 bg-surface-strong/30 px-4 py-10 text-center">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--accent)] border-t-transparent" />
                 <span className="text-sm text-muted">Loading...</span>
               </div>
             ) : visibleTodos.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-sm text-muted">
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="w-12 h-12 mb-4 rounded-full bg-surface-strong/50 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                </div>
+                <p className="text-sm font-medium text-ink/70 mb-1">
                   {todos.length === 0
                     ? "No tasks yet"
                     : trimmedQuery
-                      ? `No matches for "${trimmedQuery}"`
+                      ? "No matches found"
                       : statusFilter === "open"
                         ? "All done!"
                         : "Nothing completed"}
+                </p>
+                <p className="text-xs text-muted/60">
+                  {todos.length === 0
+                    ? "Add your first task above"
+                    : trimmedQuery
+                      ? `Try a different search term`
+                      : statusFilter === "open"
+                        ? "Time to celebrate 🎉"
+                        : "Complete some tasks to see them here"}
                 </p>
               </div>
             ) : (
@@ -566,7 +577,7 @@ function App() {
                     return (
                       <GridListItem id={todo.id} key={todo.id} textValue={todo.title}>
                         <div
-                          className={`group flex w-full items-center gap-3 py-3 transition-all ${
+                          className={`group flex w-full items-center gap-3 py-3.5 px-2 -mx-2 rounded-lg transition-all hover:bg-surface-strong/40 ${
                             isActive ? "opacity-50" : ""
                           }`}
                         >
