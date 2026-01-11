@@ -1,10 +1,12 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import "./App.css";
 import { Button } from "./components/ui/Button";
 import { Checkbox } from "./components/ui/Checkbox";
 import { GridList, GridListItem } from "./components/ui/GridList";
 import { TextField } from "./components/ui/TextField";
+import { ToggleButton } from "./components/ui/ToggleButton";
+import { ToggleButtonGroup } from "./components/ui/ToggleButtonGroup";
 import { deleteApiTodosById, getApiTodos, patchApiTodosById, postApiTodos } from "./client";
+import { useTheme } from "./lib/theme";
 
 type TodoItem = {
   id: number;
@@ -31,6 +33,14 @@ const parseTodos = (data: unknown): TodoItem[] => (Array.isArray(data) ? (data a
 const parseTodo = (data: unknown): TodoItem | null =>
   data && typeof data === "object" ? (data as TodoItem) : null;
 
+type ThemeMode = "light" | "dark" | "system";
+
+const themeOptions: Array<{ key: ThemeMode; label: string }> = [
+  { key: "light", label: "Light" },
+  { key: "dark", label: "Dark" },
+  { key: "system", label: "System" },
+];
+
 function App() {
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,8 +48,24 @@ function App() {
   const [newTitle, setNewTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTodoId, setActiveTodoId] = useState<number | null>(null);
+  const { theme, setTheme } = useTheme();
 
   const completedCount = useMemo(() => todos.filter((todo) => todo.isCompleted).length, [todos]);
+  const selectedThemeKeys = useMemo(() => new Set([theme]), [theme]);
+
+  const handleThemeChange = (selection: "all" | Iterable<unknown> | unknown) => {
+    if (selection === "light" || selection === "dark" || selection === "system") {
+      setTheme(selection);
+      return;
+    }
+
+    if (selection instanceof Set) {
+      const [nextValue] = Array.from(selection);
+      if (nextValue === "light" || nextValue === "dark" || nextValue === "system") {
+        setTheme(nextValue);
+      }
+    }
+  };
 
   const loadTodos = async () => {
     setLoading(true);
@@ -69,7 +95,7 @@ function App() {
 
     const trimmed = newTitle.trim();
     if (!trimmed) {
-      setError("Give your task a tiny title first.");
+      setError("Enter a title before adding a task.");
       return;
     }
 
@@ -158,55 +184,76 @@ function App() {
   };
 
   return (
-    <div className="todo-shell">
-      <div className="todo-shell__content">
-        <header className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-6 pt-16">
-          <div className="todo-badge">Sprinkle List</div>
-          <div className="flex flex-wrap items-end justify-between gap-6">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-12">
+        <header className="flex flex-col gap-6">
+          <div className="flex flex-wrap items-center justify-between gap-6">
             <div className="flex flex-col gap-3">
-              <h1 className="text-balance text-4xl font-semibold text-neutral-900 md:text-5xl">
-                Your tiny tasks, big sparkle energy.
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                Tasks
+              </p>
+              <h1 className="text-balance text-3xl font-semibold text-slate-900 md:text-4xl">
+                Todo list
               </h1>
-              <p className="max-w-xl text-base text-neutral-600">
-                Capture the essentials, tap to complete, and keep the day light. This is your
-                friendly corner for a few important things.
+              <p className="max-w-2xl text-base text-slate-600">
+                Keep track of the essentials. Add, complete, and clear tasks in one place.
               </p>
             </div>
-            <div className="todo-chip">
-              <span className="text-sm font-semibold text-neutral-800">{todos.length} total</span>
-              <span className="text-xs font-medium text-neutral-500">{completedCount} done</span>
+            <div className="flex flex-col items-end gap-3">
+              <ToggleButtonGroup
+                aria-label="Theme"
+                name="theme"
+                selectionMode="single"
+                disallowEmptySelection
+                selectedKeys={selectedThemeKeys}
+                onSelectionChange={handleThemeChange}
+                className="rounded-xl border border-slate-200 bg-white p-1 shadow-sm"
+              >
+                {themeOptions.map((option) => (
+                  <ToggleButton
+                    id={option.key}
+                    key={option.key}
+                    className="h-8 px-3 text-xs font-medium"
+                  >
+                    {option.label}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+              <div className="flex flex-col items-end gap-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm">
+                <span className="font-semibold text-slate-900">{todos.length} items</span>
+                <span className="text-slate-500">{completedCount} completed</span>
+              </div>
             </div>
           </div>
         </header>
 
-        <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 pb-16 pt-8">
-          <section className="todo-card p-6">
+        <main className="flex flex-col gap-6">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <form className="flex flex-col gap-4" onSubmit={handleCreate}>
               <div className="flex flex-wrap items-end gap-4">
                 <TextField
                   aria-label="Todo title"
+                  name="title"
                   value={newTitle}
                   onChange={setNewTitle}
-                  placeholder="Add a tiny task"
+                  placeholder="Add a task"
                   className="min-w-[240px] flex-1"
                 />
                 <Button type="submit" isDisabled={isSubmitting}>
                   {isSubmitting ? "Adding..." : "Add task"}
                 </Button>
               </div>
-              <p className="text-sm text-neutral-500">
-                Keep it short, keep it sweet. You can always add more later.
+              <p className="text-sm text-slate-500">
+                Keep titles short so the list stays easy to scan.
               </p>
             </form>
           </section>
 
-          <section className="todo-card flex flex-col gap-4 p-6">
+          <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex flex-col gap-1">
-                <h2 className="text-lg font-semibold text-neutral-900">Today’s spark list</h2>
-                <p className="text-sm text-neutral-500">
-                  Tap the checkbox to celebrate a tiny win.
-                </p>
+                <h2 className="text-lg font-semibold text-slate-900">Todos</h2>
+                <p className="text-sm text-slate-500">Review what needs attention today.</p>
               </div>
               <Button variant="secondary" onPress={loadTodos} isDisabled={loading}>
                 {loading ? "Refreshing" : "Refresh"}
@@ -214,27 +261,33 @@ function App() {
             </div>
 
             {error && (
-              <div className="todo-alert" role="alert">
+              <div
+                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                role="alert"
+              >
                 {error}
               </div>
             )}
 
             {loading ? (
-              <div className="todo-placeholder">Loading your tasks...</div>
+              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
+                Loading your tasks...
+              </div>
             ) : todos.length === 0 ? (
-              <div className="todo-placeholder">
-                No todos yet. Add one above and make it sparkle.
+              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
+                No todos yet. Add your first task above.
               </div>
             ) : (
               <GridList
                 aria-label="Todo list"
                 selectionMode="none"
-                className="w-full bg-white/80 border-white/40 shadow-sm"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 shadow-sm"
               >
                 {todos.map((todo) => (
                   <GridListItem id={todo.id} key={todo.id} textValue={todo.title}>
                     <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-between">
                       <Checkbox
+                        name={`todo-${todo.id}`}
                         isSelected={todo.isCompleted}
                         onChange={(value) => handleToggle(todo, value)}
                         isDisabled={activeTodoId === todo.id}
@@ -243,15 +296,13 @@ function App() {
                         <div className="flex flex-col gap-1">
                           <span
                             className={`text-base font-medium ${
-                              todo.isCompleted
-                                ? "text-neutral-400 line-through"
-                                : "text-neutral-900"
+                              todo.isCompleted ? "text-slate-400 line-through" : "text-slate-900"
                             }`}
                           >
                             {todo.title}
                           </span>
                           {todo.notes && (
-                            <span className="text-sm text-neutral-500">{todo.notes}</span>
+                            <span className="text-sm text-slate-500">{todo.notes}</span>
                           )}
                         </div>
                       </Checkbox>
