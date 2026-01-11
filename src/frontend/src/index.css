@@ -1,22 +1,42 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Lexend:wght@300;400;500;600&display=swap");
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light dark;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --font-display: "Fraunces", "Iowan Old Style", "Palatino", serif;
+  --font-body: "Lexend", "Helvetica Neue", sans-serif;
+  --paper: #f7f1e8;
+  --surface: #fbf7f1;
+  --surface-strong: #efe5d6;
+  --ink: #1b1f1a;
+  --muted: #6b6358;
+  --stroke: #e2d6c6;
+  --accent: #c46745;
+  --accent-glow: rgba(196, 103, 69, 0.35);
+  --shadow: 0 30px 70px rgba(116, 82, 43, 0.18);
+  --shadow-tight: 0 18px 36px rgba(116, 82, 43, 0.16);
 }
 
 .dark {
   color-scheme: dark;
+  --paper: #0d1413;
+  --surface: #151c1b;
+  --surface-strong: #1a2321;
+  --ink: #f4f1e7;
+  --muted: #a4ab9f;
+  --stroke: #26302d;
+  --accent: #f1b36c;
+  --accent-glow: rgba(241, 179, 108, 0.35);
+  --shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  --shadow-tight: 0 18px 40px rgba(0, 0, 0, 0.4);
 }
 
 /* Reset and base styles */
@@ -40,6 +60,9 @@ body {
   width: 100%;
   min-height: 100vh;
   overflow-x: hidden;
+  font-family: var(--font-body);
+  background-color: var(--paper);
+  color: var(--ink);
 }
 
 /* Remove default Vite styles that conflict with our design */
@@ -50,6 +73,125 @@ h1 {
 button {
   font-family: inherit;
   cursor: pointer;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.text-muted {
+  color: var(--muted);
+}
+
+.text-ink {
+  color: var(--ink);
+}
+
+.bg-paper {
+  background-color: var(--paper);
+}
+
+.bg-surface {
+  background-color: var(--surface);
+}
+
+.bg-surface-strong {
+  background-color: var(--surface-strong);
+}
+
+.border-stroke {
+  border-color: var(--stroke);
+}
+
+.shadow-soft {
+  box-shadow: var(--shadow);
+}
+
+.shadow-tight {
+  box-shadow: var(--shadow-tight);
+}
+
+.app-shell {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  background-color: var(--paper);
+  color: var(--ink);
+}
+
+.app-shell::before {
+  content: "";
+  position: absolute;
+  inset: -20% 0 0;
+  z-index: -2;
+  opacity: 0.9;
+  background-image:
+    radial-gradient(1200px circle at 10% -10%, rgba(248, 217, 167, 0.65) 0%, transparent 60%),
+    radial-gradient(900px circle at 90% 10%, rgba(204, 220, 244, 0.55) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(248, 241, 232, 0.9) 0%, rgba(240, 231, 214, 0.95) 100%);
+  pointer-events: none;
+}
+
+.app-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.08;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.dark .app-shell::before {
+  opacity: 0.85;
+  background-image:
+    radial-gradient(900px circle at 15% 0%, rgba(62, 110, 92, 0.35) 0%, transparent 60%),
+    radial-gradient(800px circle at 85% 10%, rgba(120, 86, 44, 0.35) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(14, 20, 19, 0.95) 0%, rgba(12, 16, 15, 1) 100%);
+}
+
+.dark .app-shell::after {
+  opacity: 0.12;
+  mix-blend-mode: screen;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.app-rise {
+  animation: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.todo-gridlist [role="row"] {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.todo-gridlist [role="row"][data-hovered],
+.todo-gridlist [role="row"][data-selected],
+.todo-gridlist [role="row"][data-pressed] {
+  background: transparent !important;
+}
+
+.todo-gridlist {
+  overflow: visible !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

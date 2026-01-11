@@ -20,6 +20,13 @@ const themeOptions: Array<{ key: ThemeMode; label: string }> = [
   { key: "system", label: "System" },
 ];
 
+const dueDateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+});
+
+const formatDueDate = (value: string) => dueDateFormatter.format(new Date(value));
+
 function App() {
   const queryClient = useQueryClient();
   const [mutationError, setMutationError] = useState<string | null>(null);
@@ -35,6 +42,8 @@ function App() {
   );
 
   const completedCount = useMemo(() => todos.filter((todo) => todo.isCompleted).length, [todos]);
+  const remainingCount = todos.length - completedCount;
+  const completionRate = todos.length === 0 ? 0 : Math.round((completedCount / todos.length) * 100);
   const selectedThemeKeys = useMemo(() => new Set([theme]), [theme]);
   const loadError = isError ? "Could not load todos." : null;
   const errorMessage = mutationError ?? loadError;
@@ -136,54 +145,91 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-12">
-        <header className="flex flex-col gap-6">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <div className="flex flex-col gap-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
-                Tasks
-              </p>
-              <h1 className="text-balance text-3xl font-semibold text-slate-900 dark:text-slate-100 md:text-4xl">
-                Todo list
+    <div className="app-shell">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-12 lg:py-16">
+        <header
+          className="grid items-start gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] app-rise"
+          style={{ animationDelay: "60ms" }}
+        >
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.45em] text-muted">
+              <span className="inline-flex items-center gap-2 rounded-full border border-stroke bg-surface px-4 py-2 text-[0.65rem] font-semibold text-muted shadow-tight">
+                <span className="h-2 w-2 rounded-full bg-[color:var(--accent)] shadow-[0_0_0_4px_var(--accent-glow)]" />
+                Task atelier
+              </span>
+              <span className="text-[0.7rem]">Curate the essentials</span>
+            </div>
+            <div className="space-y-4">
+              <h1 className="font-display text-4xl leading-tight text-ink md:text-5xl">
+                A studio board for the <span className="text-[color:var(--accent)]">essential</span>
               </h1>
-              <p className="max-w-2xl text-base text-slate-600 dark:text-slate-400">
-                Keep track of the essentials. Add, complete, and clear tasks in one place.
+              <p className="max-w-2xl text-base text-muted md:text-lg">
+                Shape a calm queue, celebrate momentum, and keep the most important work visible.
               </p>
             </div>
-            <div className="flex flex-col items-end gap-3">
-              <ToggleButtonGroup
-                aria-label="Theme"
-                selectionMode="single"
-                disallowEmptySelection
-                selectedKeys={selectedThemeKeys}
-                onSelectionChange={handleThemeChange}
-                className="rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-700 dark:bg-slate-800"
-              >
-                {themeOptions.map((option) => (
-                  <ToggleButton
-                    id={option.key}
-                    key={option.key}
-                    className="h-8 px-3 text-xs font-medium"
-                  >
-                    {option.label}
-                  </ToggleButton>
-                ))}
-              </ToggleButtonGroup>
-              <div className="flex flex-col items-end gap-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-800">
-                <span className="font-semibold text-slate-900 dark:text-slate-100">
-                  {todos.length} items
+            <div className="flex flex-wrap items-center gap-6">
+              <div className="rounded-2xl border border-stroke bg-surface px-5 py-3 shadow-tight">
+                <p className="text-xs uppercase tracking-[0.3em] text-muted">Status</p>
+                <p className="mt-2 font-display text-2xl text-ink">{remainingCount} open</p>
+              </div>
+              <div className="flex flex-col gap-1 text-sm text-muted">
+                <span>{todos.length} total tasks</span>
+                <span>{completedCount} completed</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col items-start gap-5 lg:items-end">
+            <ToggleButtonGroup
+              aria-label="Theme"
+              selectionMode="single"
+              disallowEmptySelection
+              selectedKeys={selectedThemeKeys}
+              onSelectionChange={handleThemeChange}
+              className="rounded-full border border-stroke bg-surface px-2 py-1 shadow-none"
+            >
+              {themeOptions.map((option) => (
+                <ToggleButton
+                  id={option.key}
+                  key={option.key}
+                  className="h-8 rounded-full px-4 text-[0.6rem] font-semibold tracking-[0.28em] text-muted !bg-transparent hover:bg-black/5 dark:hover:bg-white/10 data-[selected]:text-ink data-[selected]:!bg-[color:var(--accent)]/15 data-[selected]:shadow-[inset_0_0_0_1px_var(--stroke)]"
+                >
+                  {option.label}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+            <div className="w-full max-w-sm rounded-3xl border border-stroke bg-surface px-6 py-5 shadow-soft">
+              <div className="flex items-center justify-between text-xs uppercase tracking-[0.35em] text-muted">
+                <span>Momentum</span>
+                <span className="text-sm font-semibold tracking-normal text-ink">
+                  {completionRate}%
                 </span>
-                <span className="text-slate-500 dark:text-slate-400">
-                  {completedCount} completed
-                </span>
+              </div>
+              <div className="mt-3 h-2 w-full rounded-full bg-black/10 dark:bg-white/10">
+                <div
+                  className="h-full rounded-full bg-[color:var(--accent)] transition-[width] duration-500"
+                  style={{ width: `${completionRate}%` }}
+                />
+              </div>
+              <div className="mt-4 flex items-center justify-between text-sm text-muted">
+                <span>{remainingCount} remaining</span>
+                <span>{completedCount} done</span>
               </div>
             </div>
           </div>
         </header>
 
-        <main className="flex flex-col gap-6">
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <main className="grid items-start gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+          <section
+            className="flex flex-col gap-6 rounded-3xl border border-stroke bg-surface px-6 py-7 shadow-soft app-rise"
+            style={{ animationDelay: "140ms" }}
+          >
+            <div className="flex flex-col gap-3">
+              <p className="text-xs uppercase tracking-[0.4em] text-muted">Compose</p>
+              <h2 className="font-display text-2xl text-ink">Add a new task</h2>
+              <p className="text-sm text-muted">
+                Keep the title short, then shape the details as the work evolves.
+              </p>
+            </div>
             <form
               className="flex flex-col gap-4"
               onSubmit={(e) => {
@@ -196,38 +242,45 @@ function App() {
                   name="title"
                   children={() => (
                     <AppTextField
+                      label="Task title"
                       aria-label="Todo title"
-                      placeholder="Add a task"
-                      className="min-w-[240px] flex-1"
+                      placeholder="Sketch the next priority"
+                      className="min-w-[220px] flex-1"
                     />
                   )}
                 />
                 <createForm.AppForm>
-                  <AppSubmitButton>Add task</AppSubmitButton>
+                  <AppSubmitButton className="h-11 px-6 text-[0.7rem] font-semibold uppercase tracking-[0.3em] bg-[color:var(--accent)] text-white hover:bg-[color:var(--accent)]/90">
+                    Add task
+                  </AppSubmitButton>
                 </createForm.AppForm>
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Keep titles short so the list stays easy to scan.
-              </p>
             </form>
           </section>
 
-          <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <section
+            className="flex flex-col gap-5 rounded-3xl border border-stroke bg-surface px-6 py-7 shadow-soft app-rise"
+            style={{ animationDelay: "200ms" }}
+          >
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex flex-col gap-1">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Todos</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Review what needs attention today.
-                </p>
+                <p className="text-xs uppercase tracking-[0.4em] text-muted">Queue</p>
+                <h2 className="font-display text-2xl text-ink">Today&apos;s lineup</h2>
+                <p className="text-sm text-muted">Review, refine, and close the loop.</p>
               </div>
-              <Button variant="secondary" onPress={refreshTodos} isDisabled={loading}>
+              <Button
+                variant="secondary"
+                onPress={refreshTodos}
+                isDisabled={loading}
+                className="h-9 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] bg-surface-strong"
+              >
                 {loading ? "Refreshing" : "Refresh"}
               </Button>
             </div>
 
             {errorMessage && (
               <div
-                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400"
+                className="rounded-2xl border border-red-200/70 bg-red-50/80 px-4 py-3 text-sm text-red-700 shadow-tight dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
                 role="alert"
               >
                 {errorMessage}
@@ -235,57 +288,72 @@ function App() {
             )}
 
             {loading ? (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+              <div className="rounded-2xl border border-dashed border-stroke bg-surface-strong px-4 py-10 text-center text-sm text-muted">
                 Loading your tasks...
               </div>
             ) : todos.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-                No todos yet. Add your first task above.
+              <div className="rounded-2xl border border-dashed border-stroke bg-surface-strong px-4 py-10 text-center text-sm text-muted">
+                No tasks yet. Add your first entry in the composer.
               </div>
             ) : (
-              <GridList
-                aria-label="Todo list"
-                selectionMode="none"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 shadow-sm dark:border-slate-700 dark:bg-slate-900/60"
-              >
-                {todos.map((todo) => (
-                  <GridListItem id={todo.id} key={todo.id} textValue={todo.title}>
-                    <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                      <Checkbox
-                        name={`todo-${todo.id}`}
-                        isSelected={todo.isCompleted}
-                        onChange={(value) => handleToggle(todo, value)}
-                        isDisabled={activeTodoId === todo.id}
-                        className="items-start"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <span
-                            className={`text-base font-medium ${
-                              todo.isCompleted
-                                ? "text-slate-400 dark:text-slate-500 line-through"
-                                : "text-slate-900 dark:text-slate-100"
-                            }`}
+              <div className="rounded-3xl bg-surface-strong p-4 shadow-tight ring-1 ring-black/5 dark:ring-white/10">
+                <GridList
+                  aria-label="Todo list"
+                  selectionMode="none"
+                  className="w-full border-transparent bg-transparent shadow-none todo-gridlist grid gap-3"
+                >
+                  {todos.map((todo) => (
+                    <GridListItem id={todo.id} key={todo.id} textValue={todo.title}>
+                      <div className="group flex w-full flex-col gap-4 rounded-2xl border border-stroke bg-surface p-4 shadow-tight transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--accent)]">
+                        <div className="flex w-full flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                          <Checkbox
+                            name={`todo-${todo.id}`}
+                            isSelected={todo.isCompleted}
+                            onChange={(value) => handleToggle(todo, value)}
+                            isDisabled={activeTodoId === todo.id}
+                            className="items-center text-base"
                           >
-                            {todo.title}
-                          </span>
-                          {todo.notes && (
-                            <span className="text-sm text-slate-500 dark:text-slate-400">
-                              {todo.notes}
+                            <div className="flex flex-col gap-2">
+                              <span
+                                className={`text-base font-medium ${
+                                  todo.isCompleted ? "text-muted line-through" : "text-ink"
+                                }`}
+                              >
+                                {todo.title}
+                              </span>
+                              {todo.notes && (
+                                <span className="text-sm text-muted">{todo.notes}</span>
+                              )}
+                              {todo.dueDate && (
+                                <span className="text-[0.65rem] uppercase tracking-[0.35em] text-muted">
+                                  Due {formatDueDate(todo.dueDate)}
+                                </span>
+                              )}
+                            </div>
+                          </Checkbox>
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={`text-[0.65rem] font-semibold uppercase tracking-[0.35em] ${
+                                todo.isCompleted ? "text-muted" : "text-[color:var(--accent)]"
+                              }`}
+                            >
+                              {todo.isCompleted ? "Done" : "Open"}
                             </span>
-                          )}
+                            <Button
+                              variant="quiet"
+                              onPress={() => handleDelete(todo.id)}
+                              isDisabled={activeTodoId === todo.id}
+                              className="h-9 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-muted hover:text-[color:var(--accent)]"
+                            >
+                              Delete
+                            </Button>
+                          </div>
                         </div>
-                      </Checkbox>
-                      <Button
-                        variant="quiet"
-                        onPress={() => handleDelete(todo.id)}
-                        isDisabled={activeTodoId === todo.id}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </GridListItem>
-                ))}
-              </GridList>
+                      </div>
+                    </GridListItem>
+                  ))}
+                </GridList>
+              </div>
             )}
           </section>
         </main>
