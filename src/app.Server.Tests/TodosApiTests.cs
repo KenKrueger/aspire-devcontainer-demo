@@ -47,6 +47,22 @@ public class TodosApiTests : IClassFixture<MsSqlFixture>
 
         var deleteResponse = await client.DeleteAsync($"/api/todos/{created.Id}", cancellationToken);
         Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+        var getDeletedResponse = await client.GetAsync($"/api/todos/{created.Id}", cancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, getDeletedResponse.StatusCode);
+
+        var restoreResponse = await client.PostAsync($"/api/todos/{created.Id}/restore", null, cancellationToken);
+        restoreResponse.EnsureSuccessStatusCode();
+
+        var getRestoredResponse = await client.GetAsync($"/api/todos/{created.Id}", cancellationToken);
+        getRestoredResponse.EnsureSuccessStatusCode();
+
+        var listResponse = await client.GetAsync("/api/todos", cancellationToken);
+        listResponse.EnsureSuccessStatusCode();
+
+        var list = await listResponse.Content.ReadFromJsonAsync<List<TodoItemDto>>(JsonOptions, cancellationToken);
+        Assert.NotNull(list);
+        Assert.Contains(list!, item => item.Id == created.Id);
     }
 
     [Fact]
@@ -81,6 +97,73 @@ public class TodosApiTests : IClassFixture<MsSqlFixture>
         var list = await listResponse.Content.ReadFromJsonAsync<List<TodoItemDto>>(JsonOptions, cancellationToken);
         Assert.NotNull(list);
         Assert.All(list!, item => Assert.True(item.IsCompleted));
+    }
+
+    [Fact]
+    public async Task SearchFiltersByTitleOrNotesAsync()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var databaseName = $"todos_{Guid.NewGuid():N}";
+
+        using var factory = CreateFactory(databaseName);
+        using var client = factory.CreateClient();
+
+        _ = await client.PostAsJsonAsync(
+            "/api/todos",
+            new CreateTodoRequest("Alpha task", "needle note", null, null),
+            cancellationToken);
+        _ = await client.PostAsJsonAsync(
+            "/api/todos",
+            new CreateTodoRequest("Needle title", null, null, null),
+            cancellationToken);
+        _ = await client.PostAsJsonAsync(
+            "/api/todos",
+            new CreateTodoRequest("Other", "no match", null, null),
+            cancellationToken);
+
+        var listResponse = await client.GetAsync("/api/todos?q=needle&pageSize=100", cancellationToken);
+        listResponse.EnsureSuccessStatusCode();
+
+        var list = await listResponse.Content.ReadFromJsonAsync<List<TodoItemDto>>(JsonOptions, cancellationToken);
+        Assert.NotNull(list);
+        Assert.Equal(2, list!.Count);
+        Assert.Contains(list, item => item.Title == "Alpha task");
+        Assert.Contains(list, item => item.Title == "Needle title");
+    }
+
+    [Fact]
+    public async Task SortByDueOrdersSoonestFirstAsync()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var databaseName = $"todos_{Guid.NewGuid():N}";
+
+        using var factory = CreateFactory(databaseName);
+        using var client = factory.CreateClient();
+
+        var now = DateTimeOffset.UtcNow;
+        _ = await client.PostAsJsonAsync(
+            "/api/todos",
+            new CreateTodoRequest("No due", null, null, null),
+            cancellationToken);
+        _ = await client.PostAsJsonAsync(
+            "/api/todos",
+            new CreateTodoRequest("Due tomorrow", null, now.AddDays(1), null),
+            cancellationToken);
+        _ = await client.PostAsJsonAsync(
+            "/api/todos",
+            new CreateTodoRequest("Due today", null, now, null),
+            cancellationToken);
+
+        var listResponse = await client.GetAsync("/api/todos?sort=due&pageSize=100", cancellationToken);
+        listResponse.EnsureSuccessStatusCode();
+
+        var list = await listResponse.Content.ReadFromJsonAsync<List<TodoItemDto>>(JsonOptions, cancellationToken);
+        Assert.NotNull(list);
+        Assert.Equal(3, list!.Count);
+
+        Assert.Equal("Due today", list[0].Title);
+        Assert.Equal("Due tomorrow", list[1].Title);
+        Assert.Equal("No due", list[2].Title);
     }
 
     private WebApplicationFactory<Program> CreateFactory(string databaseName)

@@ -1,15 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Button } from "./components/ui/Button";
 import { Checkbox } from "./components/ui/Checkbox";
 import { GridList, GridListItem } from "./components/ui/GridList";
 import { ToggleButton } from "./components/ui/ToggleButton";
 import { ToggleButtonGroup } from "./components/ui/ToggleButtonGroup";
+import { TextField } from "./components/ui/TextField";
 import { useTheme } from "./lib/theme";
 import { useAppForm } from "./lib/form";
 import { AppTextField, AppSubmitButton } from "./components/form";
-import { todoCollection, todosQueryKey, type TodoItem } from "./db/todos";
+import { queue as toastQueue } from "./components/ui/Toast";
+import { restoreTodo, todoCollection, todosQueryKey, type TodoItem } from "./db/todos";
 import { postApiTodos } from "./client";
 
 type ThemeMode = "light" | "dark" | "system";
@@ -20,6 +23,21 @@ const themeOptions: Array<{ key: ThemeMode; label: string }> = [
   { key: "system", label: "System" },
 ];
 
+type StatusFilter = "all" | "open" | "done";
+type SortFilter = "newest" | "due";
+
+const statusOptions: Array<{ key: StatusFilter; label: string }> = [
+  { key: "all", label: "All" },
+  { key: "open", label: "Open" },
+  { key: "done", label: "Done" },
+];
+
+const sortOptions: Array<{ key: SortFilter; label: string }> = [
+  { key: "newest", label: "Newest" },
+  { key: "due", label: "Due" },
+];
+
+
 const dueDateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
@@ -29,6 +47,14 @@ const formatDueDate = (value: string) => dueDateFormatter.format(new Date(value)
 
 function App() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate({ from: "/" });
+  const search = useSearch({ from: "/" });
+  const statusFilter: StatusFilter = search.status ?? "all";
+  const sortFilter: SortFilter = search.sort === "due" ? "due" : "newest";
+  const queryFilter = search.q ?? "";
+
+  const [searchInput, setSearchInput] = useState(queryFilter);
+
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTodoId, setActiveTodoId] = useState<number | null>(null);
@@ -45,9 +71,93 @@ function App() {
   const remainingCount = todos.length - completedCount;
   const completionRate = todos.length === 0 ? 0 : Math.round((completedCount / todos.length) * 100);
   const selectedThemeKeys = useMemo(() => new Set([theme]), [theme]);
+  const selectedStatusKeys = useMemo(() => new Set([statusFilter]), [statusFilter]);
+  const selectedSortKeys = useMemo(() => new Set([sortFilter]), [sortFilter]);
   const loadError = isError ? "Could not load todos." : null;
   const errorMessage = mutationError ?? loadError;
   const loading = isLoading || refreshing;
+  const hasMounted = useRef(false);
+
+  useEffect(() => {
+    setSearchInput(queryFilter);
+  }, [queryFilter]);
+
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    queryClient.invalidateQueries({ queryKey: todosQueryKey });
+  }, [queryClient, queryFilter, sortFilter, statusFilter]);
+
+  useEffect(() => {
+    const normalized = searchInput.trim();
+
+    if (normalized === queryFilter) {
+      return;
+    }
+
+    const handle = window.setTimeout(() => {
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          q: normalized ? normalized : undefined,
+        }),
+      });
+    }, 250);
+
+    return () => window.clearTimeout(handle);
+  }, [navigate, queryFilter, searchInput]);
+
+  const visibleTodos = useMemo(() => {
+    const normalizedQuery = queryFilter.trim().toLowerCase();
+
+    const filtered = (() => {
+      const byStatus = (() => {
+        if (statusFilter === "open") {
+          return todos.filter((todo) => !todo.isCompleted);
+        }
+
+        if (statusFilter === "done") {
+          return todos.filter((todo) => todo.isCompleted);
+        }
+
+        return todos;
+      })();
+
+      if (!normalizedQuery) {
+        return byStatus;
+      }
+
+      return byStatus.filter((todo) => {
+        const haystack = `${todo.title} ${todo.notes ?? ""}`.toLowerCase();
+        return haystack.includes(normalizedQuery);
+      });
+    })();
+
+    if (sortFilter === "newest") {
+      return filtered;
+    }
+
+    return [...filtered].sort((a, b) => {
+      const aDue = a.dueDate ? Date.parse(a.dueDate) : null;
+      const bDue = b.dueDate ? Date.parse(b.dueDate) : null;
+
+      if (aDue == null && bDue == null) {
+        return Date.parse(b.createdAt) - Date.parse(a.createdAt);
+      }
+
+      if (aDue == null) return 1;
+      if (bDue == null) return -1;
+
+      if (aDue !== bDue) {
+        return aDue - bDue;
+      }
+
+      return Date.parse(b.createdAt) - Date.parse(a.createdAt);
+    });
+  }, [queryFilter, sortFilter, statusFilter, todos]);
 
   const handleThemeChange = (selection: "all" | Iterable<unknown> | unknown) => {
     if (selection === "light" || selection === "dark" || selection === "system") {
@@ -61,6 +171,62 @@ function App() {
         setTheme(nextValue);
       }
     }
+  };
+
+  const handleStatusChange = (selection: "all" | Iterable<unknown> | unknown) => {
+    const nextValue = (() => {
+      if (selection === "all" || selection === "open" || selection === "done") {
+        return selection;
+      }
+
+      if (selection instanceof Set) {
+        const [value] = Array.from(selection);
+        if (value === "all" || value === "open" || value === "done") {
+          return value;
+        }
+      }
+
+      return null;
+    })();
+
+    if (!nextValue) {
+      return;
+    }
+
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        status: nextValue === "all" ? undefined : nextValue,
+      }),
+    });
+  };
+
+  const handleSortChange = (selection: "all" | Iterable<unknown> | unknown) => {
+    const nextValue = (() => {
+      if (selection === "newest" || selection === "due") {
+        return selection;
+      }
+
+      if (selection instanceof Set) {
+        const [value] = Array.from(selection);
+        if (value === "newest" || value === "due") {
+          return value;
+        }
+      }
+
+      return null;
+    })();
+
+    if (!nextValue) {
+      return;
+    }
+
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        sort: nextValue === "newest" ? undefined : "due",
+      }),
+    });
   };
 
   const refreshTodos = async () => {
@@ -79,6 +245,7 @@ function App() {
   const createForm = useAppForm({
     defaultValues: {
       title: "",
+      dueDate: "",
     },
     validators: {
       onChange: ({ value }) => {
@@ -92,12 +259,14 @@ function App() {
       setMutationError(null);
 
       try {
+        const dueDate = value.dueDate.trim();
+
         const result = await postApiTodos({
           baseUrl: typeof window === "undefined" ? "" : window.location.origin,
           body: {
             title: value.title.trim(),
             notes: null,
-            dueDate: null,
+            dueDate: dueDate ? new Date(dueDate).toISOString() : null,
             sortOrder: null,
           },
         });
@@ -137,6 +306,21 @@ function App() {
 
     try {
       await todoCollection.delete(todoId);
+
+      toastQueue.add({
+        title: "Moved to trash",
+        description: "Hidden from your list. Undo if needed.",
+        action: {
+          label: "Undo",
+          onAction: async () => {
+            try {
+              await restoreTodo(todoId);
+            } catch (err) {
+              setMutationError(err instanceof Error ? err.message : "Could not restore this todo.");
+            }
+          },
+        },
+      });
     } catch (err) {
       setMutationError(err instanceof Error ? err.message : "Could not delete this todo.");
     } finally {
@@ -249,6 +433,17 @@ function App() {
                     />
                   )}
                 />
+                <createForm.AppField
+                  name="dueDate"
+                  children={() => (
+                    <AppTextField
+                      label="Due date"
+                      aria-label="Due date"
+                      type="date"
+                      className="w-[190px]"
+                    />
+                  )}
+                />
                 <createForm.AppForm>
                   <AppSubmitButton className="h-11 px-6 text-[0.7rem] font-semibold uppercase tracking-[0.3em] bg-[color:var(--accent)] text-white hover:bg-[color:var(--accent)]/90">
                     Add task
@@ -268,14 +463,61 @@ function App() {
                 <h2 className="font-display text-2xl text-ink">Today&apos;s lineup</h2>
                 <p className="text-sm text-muted">Review, refine, and close the loop.</p>
               </div>
-              <Button
-                variant="secondary"
-                onPress={refreshTodos}
-                isDisabled={loading}
-                className="h-9 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] bg-surface-strong"
-              >
-                {loading ? "Refreshing" : "Refresh"}
-              </Button>
+              <div className="flex flex-wrap items-center gap-3">
+                <TextField
+                  aria-label="Search"
+                  placeholder="Search"
+                  value={searchInput}
+                  onChange={setSearchInput}
+                  className="w-[220px]"
+                />
+                <ToggleButtonGroup
+                  aria-label="Status"
+                  selectionMode="single"
+                  disallowEmptySelection
+                  selectedKeys={selectedStatusKeys}
+                  onSelectionChange={handleStatusChange}
+                  className="rounded-full border border-stroke bg-surface px-2 py-1 shadow-none"
+                >
+                  {statusOptions.map((option) => (
+                    <ToggleButton
+                      id={option.key}
+                      key={option.key}
+                      className="h-8 rounded-full px-4 text-[0.6rem] font-semibold tracking-[0.28em] text-muted !bg-transparent hover:bg-black/5 dark:hover:bg-white/10 data-[selected]:text-ink data-[selected]:!bg-[color:var(--accent)]/15 data-[selected]:shadow-[inset_0_0_0_1px_var(--stroke)]"
+                    >
+                      {option.label}
+                    </ToggleButton>
+                  ))}
+                </ToggleButtonGroup>
+
+                <ToggleButtonGroup
+                  aria-label="Sort"
+                  selectionMode="single"
+                  disallowEmptySelection
+                  selectedKeys={selectedSortKeys}
+                  onSelectionChange={handleSortChange}
+                  className="rounded-full border border-stroke bg-surface px-2 py-1 shadow-none"
+                >
+                  {sortOptions.map((option) => (
+                    <ToggleButton
+                      id={option.key}
+                      key={option.key}
+                      className="h-8 rounded-full px-4 text-[0.6rem] font-semibold tracking-[0.28em] text-muted !bg-transparent hover:bg-black/5 dark:hover:bg-white/10 data-[selected]:text-ink data-[selected]:!bg-[color:var(--accent)]/15 data-[selected]:shadow-[inset_0_0_0_1px_var(--stroke)]"
+                    >
+                      {option.label}
+                    </ToggleButton>
+                  ))}
+                </ToggleButtonGroup>
+
+                <Button
+                  variant="secondary"
+                  onPress={refreshTodos}
+                  isDisabled={loading}
+                  className="h-9 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] bg-surface-strong"
+                >
+                  {loading ? "Refreshing" : "Refresh"}
+                </Button>
+              </div>
             </div>
 
             {errorMessage && (
@@ -291,9 +533,15 @@ function App() {
               <div className="rounded-2xl border border-dashed border-stroke bg-surface-strong px-4 py-10 text-center text-sm text-muted">
                 Loading your tasks...
               </div>
-            ) : todos.length === 0 ? (
+            ) : visibleTodos.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-stroke bg-surface-strong px-4 py-10 text-center text-sm text-muted">
-                No tasks yet. Add your first entry in the composer.
+                {todos.length === 0
+                  ? "No tasks yet. Add your first entry in the composer."
+                  : queryFilter.trim()
+                    ? `No matches for "${queryFilter.trim()}".`
+                    : statusFilter === "open"
+                      ? "No open tasks right now."
+                      : "No completed tasks yet."}
               </div>
             ) : (
               <div className="rounded-3xl bg-surface-strong p-4 shadow-tight ring-1 ring-black/5 dark:ring-white/10">
@@ -302,7 +550,7 @@ function App() {
                   selectionMode="none"
                   className="w-full border-transparent bg-transparent shadow-none todo-gridlist grid gap-3"
                 >
-                  {todos.map((todo) => (
+                  {visibleTodos.map((todo) => (
                     <GridListItem id={todo.id} key={todo.id} textValue={todo.title}>
                       <div className="group flex w-full flex-col gap-4 rounded-2xl border border-stroke bg-surface p-4 shadow-tight transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--accent)]">
                         <div className="flex w-full flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -339,6 +587,14 @@ function App() {
                             >
                               {todo.isCompleted ? "Done" : "Open"}
                             </span>
+                            <Button
+                              variant="quiet"
+                              onPress={() => navigate({ to: `/todos/${todo.id}` })}
+                              isDisabled={activeTodoId === todo.id}
+                              className="h-9 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-muted hover:text-[color:var(--accent)]"
+                            >
+                              Edit
+                            </Button>
                             <Button
                               variant="quiet"
                               onPress={() => handleDelete(todo.id)}

@@ -41,6 +41,14 @@ static async Task EnsureDatabaseCreatedAsync(IServiceProvider services)
     using var scope = services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
     await dbContext.Database.EnsureCreatedAsync();
+
+    await dbContext.Database.ExecuteSqlRawAsync(
+        """
+        IF COL_LENGTH('Todos', 'DeletedAt') IS NULL
+        BEGIN
+            ALTER TABLE [Todos] ADD [DeletedAt] datetimeoffset NULL;
+        END
+        """);
 }
 
 public partial class Program;

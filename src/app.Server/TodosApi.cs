@@ -12,6 +12,7 @@ public static class TodosApi
             TodoDbContext dbContext,
             HttpContext httpContext,
             bool? completed,
+            string? q,
             int page = 1,
             int pageSize = 20,
             string? sort = null) =>
@@ -19,11 +20,27 @@ public static class TodosApi
             page = page < 1 ? 1 : page;
             pageSize = pageSize < 1 ? 20 : Math.Min(pageSize, 100);
 
-            IQueryable<TodoItem> query = dbContext.Todos.AsNoTracking();
+            IQueryable<TodoItem> query = dbContext.Todos
+                .AsNoTracking()
+                .Where(item => item.DeletedAt == null);
 
             if (completed.HasValue)
             {
                 query = query.Where(item => item.IsCompleted == completed.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var search = q.Trim();
+                if (search.Length > 80)
+                {
+                    search = search[..80];
+                }
+
+                var pattern = $"%{search}%";
+                query = query.Where(item =>
+                    EF.Functions.Like(item.Title, pattern) ||
+                    (item.Notes != null && EF.Functions.Like(item.Notes, pattern)));
             }
 
             var totalCount = await query.CountAsync();
@@ -45,7 +62,7 @@ public static class TodosApi
         todos.MapGet("{id:int}", async (TodoDbContext dbContext, int id) =>
         {
             var item = await dbContext.Todos.AsNoTracking()
-                .FirstOrDefaultAsync(todo => todo.Id == id);
+                .FirstOrDefaultAsync(todo => todo.Id == id && todo.DeletedAt == null);
 
             return item is null ? Results.NotFound() : Results.Ok(TodoItemDto.FromEntity(item));
         });
@@ -82,7 +99,7 @@ public static class TodosApi
         {
             var item = await dbContext.Todos.FindAsync(id);
 
-            if (item is null)
+            if (item is null || item.DeletedAt != null)
             {
                 return Results.NotFound();
             }
@@ -128,15 +145,40 @@ public static class TodosApi
         todos.MapDelete("{id:int}", async (TodoDbContext dbContext, int id) =>
         {
             var item = await dbContext.Todos.FindAsync(id);
+            if (item is null || item.DeletedAt != null)
+            {
+                return Results.NotFound();
+            }
+
+            var now = DateTimeOffset.UtcNow;
+            item.DeletedAt = now;
+            item.UpdatedAt = now;
+
+            await dbContext.SaveChangesAsync();
+
+            return Results.NoContent();
+        });
+
+        todos.MapPost("{id:int}/restore", async (TodoDbContext dbContext, int id) =>
+        {
+            var item = await dbContext.Todos.FindAsync(id);
+
             if (item is null)
             {
                 return Results.NotFound();
             }
 
-            dbContext.Todos.Remove(item);
+            if (item.DeletedAt == null)
+            {
+                return Results.Ok(TodoItemDto.FromEntity(item));
+            }
+
+            item.DeletedAt = null;
+            item.UpdatedAt = DateTimeOffset.UtcNow;
+
             await dbContext.SaveChangesAsync();
 
-            return Results.NoContent();
+            return Results.Ok(TodoItemDto.FromEntity(item));
         });
 
         return endpoints;
@@ -152,6 +194,12 @@ public static class TodosApi
             "-title" => query.OrderByDescending(item => item.Title),
             "order" => query.OrderBy(item => item.SortOrder),
             "-order" => query.OrderByDescending(item => item.SortOrder),
+            "due" => query.OrderBy(item => item.DueDate == null)
+                .ThenBy(item => item.DueDate)
+                .ThenByDescending(item => item.CreatedAt),
+            "-due" => query.OrderBy(item => item.DueDate == null)
+                .ThenByDescending(item => item.DueDate)
+                .ThenByDescending(item => item.CreatedAt),
             _ => query.OrderByDescending(item => item.CreatedAt)
         };
     }
@@ -197,6 +245,7 @@ class TodoItem
     public bool IsCompleted { get; set; }
     public int SortOrder { get; set; }
     public DateTimeOffset? DueDate { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 }
