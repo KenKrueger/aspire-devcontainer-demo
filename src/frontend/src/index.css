@@ -247,7 +247,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .todo-gridlist [role="row"] {
   padding: 0 !important;
   border: 0 !important;
-  border-bottom: 1px solid var(--stroke) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--stroke) 50%, transparent) !important;
   border-radius: 0 !important;
   background: transparent !important;
 }

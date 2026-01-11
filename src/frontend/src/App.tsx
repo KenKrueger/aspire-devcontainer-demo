@@ -439,7 +439,7 @@ function App() {
                 )}
               />
               <createForm.AppForm>
-                <AppSubmitButton className="h-10 px-5 text-xs font-medium rounded-md shrink-0 ml-1">
+                <AppSubmitButton className="h-10 px-5 text-xs font-medium rounded-lg shrink-0 ml-1 shadow-sm hover:shadow-md transition-shadow">
                   <span className="hidden sm:inline">Add</span>
                   <svg className="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -592,8 +592,8 @@ function App() {
                             type="button"
                             onClick={() => !isActive && handleToggle(todo, !todo.isCompleted)}
                             disabled={isActive}
-                            className={`min-w-0 flex-1 text-left text-[0.875rem] leading-snug transition-colors cursor-pointer hover:opacity-80 ${
-                              todo.isCompleted ? "text-muted/40 line-through decoration-muted/30" : "text-ink"
+                            className={`min-w-0 flex-1 text-left text-[0.875rem] leading-snug transition-all cursor-pointer hover:opacity-80 ${
+                              todo.isCompleted ? "text-muted/50 line-through decoration-muted/40 decoration-1" : "text-ink"
                             }`}
                           >
                             {todo.title}
