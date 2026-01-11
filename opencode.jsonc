@@ -3,17 +3,36 @@
   "mcp": {
     "aspire": {
       "type": "local",
-      "command": ["aspire", "mcp", "start"],
+      "command": [
+        "aspire",
+        "mcp",
+        "start"
+      ],
       "enabled": true
     },
     "chrome-devtools": {
       "type": "local",
-      "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ],
       "enabled": false
     },
     "playwright": {
       "type": "local",
-      "command": ["npx", "@playwright/mcp@latest"],
+      "command": [
+        "npx",
+        "@playwright/mcp@latest"
+      ],
+      "enabled": true
+    },
+    "React Aria": {
+      "type": "local",
+      "command": [
+        "npx",
+        "@react-aria/mcp@latest"
+      ],
       "enabled": true
     }
   },
