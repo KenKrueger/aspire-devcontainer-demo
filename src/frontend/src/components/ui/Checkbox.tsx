@@ -17,27 +17,27 @@ const checkboxStyles = tv({
 
 const boxStyles = tv({
   extend: focusRing,
-  base: "w-5 h-5 box-border shrink-0 rounded-md flex items-center justify-center border transition shadow-sm",
+  base: "w-[18px] h-[18px] box-border shrink-0 rounded flex items-center justify-center border transition-colors",
   variants: {
     isSelected: {
       false:
-        "bg-[color:var(--surface-raised)] border-[color:var(--stroke)] group-pressed:border-[color:var(--accent-border)] group-hover:border-[color:var(--accent-border)]",
+        "bg-[color:var(--surface)] border-[color:var(--stroke)] group-hover:border-[color:var(--muted)]",
       true:
-        "bg-[color:var(--accent)] border-[color:var(--accent)] group-pressed:bg-[color:var(--accent-strong)] group-hover:brightness-105 forced-colors:bg-[Highlight] forced-colors:border-[Highlight]",
+        "bg-[color:var(--accent)] border-[color:var(--accent)] group-hover:bg-[color:var(--accent-strong)] forced-colors:bg-[Highlight] forced-colors:border-[Highlight]",
     },
     isInvalid: {
       true:
-        "border-[color:var(--danger)] forced-colors:border-[Mark] group-pressed:border-[color:var(--danger-border)]",
+        "border-[color:var(--danger)] forced-colors:border-[Mark]",
     },
     isDisabled: {
       true:
-        "border-[color:var(--stroke)] bg-[color:var(--surface-strong)] forced-colors:border-[GrayText]",
+        "border-[color:var(--stroke)] bg-[color:var(--surface-strong)] opacity-50 forced-colors:border-[GrayText]",
     },
   },
 });
 
 const iconStyles =
-  "w-3.5 h-3.5 text-[color:var(--accent-contrast)] group-disabled:text-muted forced-colors:text-[HighlightText] drop-shadow-sm";
+  "w-3 h-3 text-[color:var(--accent-contrast)] group-disabled:text-[color:var(--muted)] forced-colors:text-[HighlightText]";
 
 export function Checkbox(props: CheckboxProps) {
   return (

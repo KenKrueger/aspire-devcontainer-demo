@@ -11,21 +11,21 @@ export interface ButtonProps extends RACButtonProps {
 
 let button = tv({
   extend: focusRing,
-  base: "relative inline-flex items-center justify-center gap-2 border-2 border-transparent h-10 box-border px-5 py-0 [&:has(>svg:only-child)]:px-0 [&:has(>svg:only-child)]:h-9 [&:has(>svg:only-child)]:w-9 font-body text-sm font-semibold text-center transition-all duration-200 rounded-xl cursor-pointer [-webkit-tap-highlight-color:transparent]",
+  base: "relative inline-flex items-center justify-center gap-2 border border-transparent h-10 box-border px-5 py-0 [&:has(>svg:only-child)]:px-0 [&:has(>svg:only-child)]:h-9 [&:has(>svg:only-child)]:w-9 font-body text-sm font-medium text-center transition-colors rounded-md cursor-pointer [-webkit-tap-highlight-color:transparent]",
   variants: {
     variant: {
       primary:
-        "bg-[color:var(--accent)] text-[color:var(--accent-contrast)] shadow-tight hover:bg-[color:var(--accent-strong)] hover:shadow-soft hover:-translate-y-0.5 pressed:bg-[color:var(--accent-strong)] pressed:translate-y-0",
+        "bg-[color:var(--accent)] text-[color:var(--accent-contrast)] hover:bg-[color:var(--accent-strong)] pressed:bg-[color:var(--accent-strong)]",
       secondary:
-        "border-[color:var(--stroke)] bg-surface text-ink hover:bg-[color:var(--surface-strong)] hover:border-[color:var(--accent-border)]/50 pressed:bg-[color:var(--surface-strong)]",
+        "border-[color:var(--stroke)] bg-[color:var(--surface)] text-[color:var(--ink)] hover:bg-[color:var(--surface-strong)] pressed:bg-[color:var(--surface-strong)]",
       destructive:
-        "bg-[color:var(--danger)] text-[color:var(--accent-contrast)] hover:bg-[color:var(--danger)]/90 hover:-translate-y-0.5 pressed:bg-[color:var(--danger)]/80 pressed:translate-y-0",
+        "bg-[color:var(--danger)] text-white hover:opacity-90 pressed:opacity-80",
       quiet:
-        "border-0 bg-transparent text-muted hover:text-ink hover:bg-[color:var(--surface-strong)] pressed:bg-[color:var(--surface-strong)]",
+        "border-0 bg-transparent text-[color:var(--muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-strong)] pressed:bg-[color:var(--surface-strong)]",
     },
     isDisabled: {
       true:
-        "border-transparent bg-[color:var(--surface-strong)] text-muted cursor-not-allowed opacity-60 forced-colors:text-[GrayText] hover:transform-none",
+        "border-transparent bg-[color:var(--surface-strong)] text-[color:var(--muted)] cursor-not-allowed opacity-50 forced-colors:text-[GrayText]",
     },
     isPending: {
       true: "text-transparent",

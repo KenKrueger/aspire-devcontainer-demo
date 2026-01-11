@@ -247,7 +247,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .todo-gridlist [role="row"] {
   padding: 0 !important;
   border: 0 !important;
+  border-bottom: 1px solid var(--stroke) !important;
+  border-radius: 0 !important;
   background: transparent !important;
+}
+
+.todo-gridlist [role="row"]:last-child {
+  border-bottom: 0 !important;
 }
 
 .todo-gridlist [role="row"][data-hovered],
