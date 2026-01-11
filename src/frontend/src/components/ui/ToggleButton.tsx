@@ -6,15 +6,17 @@ import { focusRing } from "@/lib/react-aria-utils";
 
 let styles = tv({
   extend: focusRing,
-  base: "relative inline-flex items-center justify-center gap-2 border border-black/10 dark:border-white/10 h-9 box-border px-3.5 [&:has(>svg:only-child)]:px-0 [&:has(>svg:only-child)]:h-8 [&:has(>svg:only-child)]:aspect-square font-sans text-sm text-center transition rounded-lg cursor-default forced-color-adjust-none [-webkit-tap-highlight-color:transparent]",
+  base: "relative inline-flex items-center justify-center gap-2 border border-[color:var(--stroke)] h-9 box-border px-3.5 [&:has(>svg:only-child)]:px-0 [&:has(>svg:only-child)]:h-8 [&:has(>svg:only-child)]:aspect-square font-body text-sm text-center transition rounded-full cursor-pointer forced-color-adjust-none [-webkit-tap-highlight-color:transparent]",
   variants: {
     isSelected: {
       false:
-        "bg-neutral-50 hover:bg-neutral-100 pressed:bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:pressed:bg-neutral-500 dark:text-neutral-100 forced-colors:bg-[ButtonFace]! forced-colors:text-[ButtonText]!",
-      true: "bg-neutral-700 hover:bg-neutral-800 pressed:bg-neutral-900 text-white dark:bg-neutral-300 dark:hover:bg-neutral-200 dark:pressed:bg-neutral-100 dark:text-black forced-colors:bg-[Highlight]! forced-colors:text-[HighlightText]!",
+        "bg-[color:var(--surface-raised)] text-muted hover:bg-[color:var(--surface-strong)] pressed:bg-[color:var(--surface-strong)] forced-colors:bg-[ButtonFace]! forced-colors:text-[ButtonText]!",
+      true:
+        "bg-[color:var(--accent-soft)] border-[color:var(--accent-border)] text-ink shadow-tight forced-colors:bg-[Highlight]! forced-colors:text-[HighlightText]!",
     },
     isDisabled: {
-      true: "border-transparent dark:border-transparent bg-neutral-100 dark:bg-neutral-800 forced-colors:bg-[ButtonFace]! text-neutral-300 dark:text-neutral-600 forced-colors:text-[GrayText]!",
+      true:
+        "border-transparent bg-[color:var(--surface-strong)] text-muted forced-colors:bg-[ButtonFace]! forced-colors:text-[GrayText]!",
     },
   },
 });

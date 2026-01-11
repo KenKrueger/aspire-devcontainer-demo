@@ -1,11 +1,14 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { TextField, type TextFieldProps } from "@/components/ui/TextField";
 import { useFieldContext } from "@/lib/form-context";
 
 export interface AppTextFieldProps extends Omit<TextFieldProps, "value" | "onChange" | "onBlur"> {
   /** Label text displayed above the input */
-  label?: string;
+  label?: ReactNode;
+  /** Optional hint rendered inline with the label */
+  optionalLabel?: string;
   /** Description text displayed below the input */
   description?: string;
 }
@@ -23,11 +26,27 @@ export interface AppTextFieldProps extends Omit<TextFieldProps, "value" | "onCha
  * <form.AppField name="title" children={() => <AppTextField label="Title" />} />
  * ```
  */
-export function AppTextField({ label, description, ...props }: AppTextFieldProps) {
+export function AppTextField({
+  label,
+  optionalLabel,
+  description,
+  ...props
+}: AppTextFieldProps) {
   const field = useFieldContext<string>();
 
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
   const errorMessage = field.state.meta.errors.join(", ");
+  const labelContent =
+    label && optionalLabel ? (
+      <span className="inline-flex items-baseline gap-2">
+        <span>{label}</span>
+        <span className="text-[0.6rem] font-medium normal-case tracking-normal text-muted/70">
+          ({optionalLabel})
+        </span>
+      </span>
+    ) : (
+      label
+    );
 
   return (
     <TextField
@@ -37,7 +56,7 @@ export function AppTextField({ label, description, ...props }: AppTextFieldProps
       onChange={(value) => field.handleChange(value)}
       onBlur={field.handleBlur}
       isInvalid={isInvalid}
-      label={label}
+      label={labelContent}
       description={description}
       errorMessage={isInvalid ? errorMessage : undefined}
     />
