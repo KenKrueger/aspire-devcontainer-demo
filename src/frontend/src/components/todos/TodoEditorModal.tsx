@@ -22,12 +22,12 @@ export function TodoEditorModal({ id }: TodoEditorModalProps) {
         }
       }}
       isDismissable
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-md"
     >
-      <Modal className="w-full max-w-xl mx-4">
+      <Modal className="w-full max-w-2xl mx-0 sm:mx-4">
         <Dialog
           aria-labelledby="todo-editor-title"
-          className="rounded-3xl border border-stroke bg-surface-raised p-6 shadow-soft outline-none app-rise"
+          className="rounded-t-3xl sm:rounded-3xl border-t border-x sm:border border-stroke bg-surface p-5 sm:p-8 shadow-soft outline-none app-rise max-h-[92vh] overflow-y-auto"
         >
           <TodoEditorContent id={id} onClose={handleClose} />
         </Dialog>
