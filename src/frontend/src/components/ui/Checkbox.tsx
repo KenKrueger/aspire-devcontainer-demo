@@ -17,13 +17,13 @@ const checkboxStyles = tv({
 
 const boxStyles = tv({
   extend: focusRing,
-  base: "w-[22px] h-[22px] box-border shrink-0 rounded flex items-center justify-center border-2 transition-colors",
+  base: "w-[22px] h-[22px] box-border shrink-0 rounded-md flex items-center justify-center border-2 transition-all shadow-sm",
   variants: {
     isSelected: {
       false:
-        "bg-[color:var(--surface)] border-[color:var(--stroke)] group-hover:border-[color:var(--muted)]",
+        "bg-[color:var(--surface)] border-[color:var(--stroke)] group-hover:border-[color:var(--muted)] group-hover:shadow",
       true:
-        "bg-[color:var(--accent)] border-[color:var(--accent)] group-hover:bg-[color:var(--accent-strong)] forced-colors:bg-[Highlight] forced-colors:border-[Highlight]",
+        "bg-[color:var(--accent)] border-[color:var(--accent)] group-hover:bg-[color:var(--accent-strong)] shadow-md forced-colors:bg-[Highlight] forced-colors:border-[Highlight]",
     },
     isInvalid: {
       true:
