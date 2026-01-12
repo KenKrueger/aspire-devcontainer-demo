@@ -23,6 +23,12 @@ const themeOptions: Array<{ key: ThemeMode; label: string }> = [
 type StatusFilter = "all" | "open" | "done";
 type SortFilter = "newest" | "due";
 
+type TodoSearch = {
+  status?: "open" | "done";
+  sort?: "due";
+  q?: string;
+};
+
 const statusOptions: Array<{ key: StatusFilter; label: string }> = [
   { key: "all", label: "All" },
   { key: "open", label: "Open" },
@@ -45,8 +51,8 @@ const formatHeaderDate = (value: Date) => headerDateFormatter.format(value);
 
 function App() {
   const queryClient = useQueryClient();
-  const navigate = useNavigate({ from: "/" });
-  const search = useSearch({ from: "/" });
+  const navigate = useNavigate();
+  const search = useSearch({ strict: false }) as TodoSearch;
   const statusFilter: StatusFilter = search.status ?? "all";
   const sortFilter: SortFilter = search.sort === "due" ? "due" : "newest";
   const queryFilter = search.q ?? "";
@@ -135,7 +141,8 @@ function App() {
 
     const handle = window.setTimeout(() => {
       navigate({
-        search: (prev) => ({
+        to: ".",
+        search: (prev: TodoSearch) => ({
           ...prev,
           q: normalized ? normalized : undefined,
         }),
@@ -215,7 +222,8 @@ function App() {
     }
 
     navigate({
-      search: (prev) => ({
+      to: ".",
+      search: (prev: TodoSearch) => ({
         ...prev,
         status: nextValue === "all" ? undefined : nextValue,
       }),

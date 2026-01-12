@@ -9,68 +9,91 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as TodosIdRouteImport } from './routes/todos.$id'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppTodosIdRouteImport } from './routes/_app/todos.$id'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TodosIdRoute = TodosIdRouteImport.update({
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTodosIdRoute = AppTodosIdRouteImport.update({
   id: '/todos/$id',
   path: '/todos/$id',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/todos/$id': typeof TodosIdRoute
+  '/': typeof AppIndexRoute
+  '/todos/$id': typeof AppTodosIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/todos/$id': typeof TodosIdRoute
+  '/': typeof AppIndexRoute
+  '/todos/$id': typeof AppTodosIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/todos/$id': typeof TodosIdRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/': typeof AppIndexRoute
+  '/_app/todos/$id': typeof AppTodosIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths: '/' | '/todos/$id'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/todos/$id'
-  id: '__root__' | '/' | '/todos/$id'
+  id: '__root__' | '/_app' | '/_app/' | '/_app/todos/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  TodosIdRoute: typeof TodosIdRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/todos/$id': {
-      id: '/todos/$id'
+    '/_app/': {
+      id: '/_app/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/todos/$id': {
+      id: '/_app/todos/$id'
       path: '/todos/$id'
       fullPath: '/todos/$id'
-      preLoaderRoute: typeof TodosIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppTodosIdRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
+interface AppRouteChildren {
+  AppIndexRoute: typeof AppIndexRoute
+  AppTodosIdRoute: typeof AppTodosIdRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppIndexRoute: AppIndexRoute,
+  AppTodosIdRoute: AppTodosIdRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  TodosIdRoute: TodosIdRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

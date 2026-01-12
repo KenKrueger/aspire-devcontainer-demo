@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import App from "../App";
 
 type StatusSearch = "open" | "done";
@@ -10,7 +10,7 @@ type TodoSearch = {
   q?: string;
 };
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_app")({
   validateSearch: (search: Record<string, unknown>): TodoSearch => {
     const next: TodoSearch = {};
 
@@ -34,6 +34,15 @@ export const Route = createFileRoute("/")({
 
     return next;
   },
-  component: App,
+  component: AppLayout,
 });
+
+function AppLayout() {
+  return (
+    <>
+      <App />
+      <Outlet />
+    </>
+  );
+}
 
