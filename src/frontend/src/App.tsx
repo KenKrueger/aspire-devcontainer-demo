@@ -371,9 +371,9 @@ function App() {
                     onClick={() => setSettingsOpen(false)}
                     aria-hidden="true"
                   />
-                  <div className="absolute right-0 top-full mt-2 z-50">
-                    <div className="rounded-lg border border-stroke bg-surface p-3 shadow-tight min-w-[140px]">
-                      <span className="block mb-2 text-[0.65rem] uppercase tracking-widest text-muted/60 font-medium">Theme</span>
+                  <div className="absolute right-0 top-full mt-2 z-50 app-scale-in">
+                    <div className="rounded-xl border border-stroke bg-surface p-3 shadow-soft min-w-[160px]">
+                      <span className="block mb-3 text-[0.65rem] uppercase tracking-widest text-muted/60 font-semibold px-1">Theme</span>
                       <div className="flex flex-col gap-1">
                         {themeOptions.map((option) => (
                           <button
@@ -383,10 +383,10 @@ function App() {
                               setTheme(option.key);
                               setSettingsOpen(false);
                             }}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                               theme === option.key
-                                ? "bg-[color:var(--accent-soft)] text-[color:var(--accent)]"
-                                : "text-ink hover:bg-surface-strong"
+                                ? "bg-[color:var(--accent-soft)] text-[color:var(--accent)] shadow-sm"
+                                : "text-ink hover:bg-surface-strong/60 hover:shadow-sm"
                             }`}
                           >
                             {option.key === "light" && (
@@ -404,7 +404,12 @@ function App() {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
                               </svg>
                             )}
-                            {option.label}
+                            <span className="flex-1">{option.label}</span>
+                            {theme === option.key && (
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                              </svg>
+                            )}
                           </button>
                         ))}
                       </div>
@@ -508,20 +513,23 @@ function App() {
 
             {errorMessage && (
               <div
-                className="rounded-md border border-[color:var(--danger-border)] bg-[color:var(--danger-soft)] px-2.5 py-1.5 text-[0.7rem] text-[color:var(--danger)]"
+                className="rounded-lg border border-[color:var(--danger-border)] bg-[color:var(--danger-soft)] px-4 py-3 text-sm text-[color:var(--danger)] shadow-sm app-scale-in flex items-start gap-2"
                 role="alert"
               >
-                {errorMessage}
+                <svg className="h-5 w-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                <span className="flex-1 font-medium">{errorMessage}</span>
               </div>
             )}
 
             {loading ? (
-              <div className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-stroke/50 bg-surface-strong/30 px-4 py-10 text-center">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--accent)] border-t-transparent" />
-                <span className="text-sm text-muted">Loading...</span>
+              <div className="flex items-center justify-center gap-3 rounded-xl border border-dashed border-stroke/70 bg-surface-strong/30 px-4 py-12 text-center app-fade-in">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-[color:var(--accent)] border-t-transparent" />
+                <span className="text-sm font-medium text-ink/70">Loading tasks...</span>
               </div>
             ) : visibleTodos.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="flex flex-col items-center justify-center py-20 text-center app-fade-in">
                 <div className="w-16 h-16 mb-5 rounded-2xl bg-surface-strong/60 flex items-center justify-center shadow-sm">
                   <svg className="w-8 h-8 text-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -536,7 +544,7 @@ function App() {
                         ? "All done!"
                         : "Nothing completed"}
                 </p>
-                <p className="text-sm text-muted/60">
+                <p className="text-sm text-muted/60 max-w-xs">
                   {todos.length === 0
                     ? "Add your first task above to get started"
                     : trimmedQuery
@@ -573,8 +581,8 @@ function App() {
                               : "text-muted/60";
 
                         dueBadge = (
-                          <span className={`text-xs tabular-nums ${badgeClass}`}>
-                            {isOverdue && "! "}
+                          <span className={`text-xs tabular-nums font-medium transition-colors ${badgeClass}`}>
+                            {isOverdue && "⚠️ "}
                             {formatDueDate(todo.dueDate)}
                           </span>
                         );
