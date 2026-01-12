@@ -334,13 +334,13 @@ function App() {
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-4 sm:gap-5 sm:px-8 sm:py-8">
         <header className="relative z-20 flex items-center justify-between app-rise" style={{ animationDelay: "60ms" }}>
           <div className="flex flex-col">
-            <h1 className="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+            <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-ink">
               Tasks
             </h1>
-            <span className="text-[0.7rem] text-muted/70 tracking-wide uppercase">{todayLabel}</span>
+            <span className="text-[0.6rem] sm:text-[0.65rem] text-muted/60 tracking-widest uppercase font-medium">{todayLabel}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className={`text-[0.7rem] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-full ${
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className={`text-[0.6rem] sm:text-[0.65rem] uppercase tracking-widest font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-sm ${
               remainingCount === 0 
                 ? "bg-[color:var(--success-soft)] text-[color:var(--success)]"
                 : overdueCount > 0
@@ -355,7 +355,7 @@ function App() {
               <button
                 type="button"
                 onClick={() => setSettingsOpen(!settingsOpen)}
-                className="flex h-8 w-8 items-center justify-center rounded-md text-muted/50 transition-all hover:text-muted hover:bg-surface-strong/50"
+                className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg text-muted/50 transition-all hover:text-muted hover:bg-surface-strong/50 shadow-sm hover:shadow"
                 aria-label="Settings"
                 aria-expanded={settingsOpen}
               >
@@ -371,9 +371,9 @@ function App() {
                     onClick={() => setSettingsOpen(false)}
                     aria-hidden="true"
                   />
-                  <div className="absolute right-0 top-full mt-2 z-50">
-                    <div className="rounded-lg border border-stroke bg-surface p-3 shadow-tight min-w-[140px]">
-                      <span className="block mb-2 text-[0.65rem] uppercase tracking-widest text-muted/60 font-medium">Theme</span>
+                  <div className="absolute right-0 top-full mt-2 z-50 app-scale-in">
+                    <div className="rounded-xl border border-stroke bg-surface p-3 shadow-soft min-w-[160px]">
+                      <span className="block mb-3 text-[0.65rem] uppercase tracking-widest text-muted/60 font-semibold px-1">Theme</span>
                       <div className="flex flex-col gap-1">
                         {themeOptions.map((option) => (
                           <button
@@ -383,10 +383,10 @@ function App() {
                               setTheme(option.key);
                               setSettingsOpen(false);
                             }}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                               theme === option.key
-                                ? "bg-[color:var(--accent-soft)] text-[color:var(--accent)]"
-                                : "text-ink hover:bg-surface-strong"
+                                ? "bg-[color:var(--accent-soft)] text-[color:var(--accent)] shadow-sm"
+                                : "text-ink hover:bg-surface-strong/60 hover:shadow-sm"
                             }`}
                           >
                             {option.key === "light" && (
@@ -404,7 +404,12 @@ function App() {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
                               </svg>
                             )}
-                            {option.label}
+                            <span className="flex-1">{option.label}</span>
+                            {theme === option.key && (
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                              </svg>
+                            )}
                           </button>
                         ))}
                       </div>
@@ -420,7 +425,7 @@ function App() {
           {/* Compose form */}
           <section className="app-rise" style={{ animationDelay: "100ms" }}>
             <form
-              className="flex gap-3 items-center p-3 -mx-3 rounded-xl bg-surface-strong/20"
+              className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center p-3 sm:p-4 -mx-3 rounded-xl sm:rounded-2xl bg-surface border border-stroke/40 shadow-sm hover:shadow-md transition-shadow"
               onSubmit={(e) => {
                 e.preventDefault();
                 createForm.handleSubmit();
@@ -431,29 +436,29 @@ function App() {
                 children={() => (
                   <AppTextField
                     aria-label="New task"
-                    placeholder="Add a task..."
+                    placeholder="Add a new task..."
                     className="flex-1 min-w-0"
                   />
                 )}
               />
-              <createForm.AppField
-                name="dueDate"
-                children={() => (
-                  <AppTextField
-                    aria-label="Due date"
-                    type="date"
-                    className="w-[140px] shrink-0 hidden sm:block"
-                  />
-                )}
-              />
-              <createForm.AppForm>
-                <AppSubmitButton className="h-10 px-5 text-xs font-medium rounded-lg shrink-0 ml-1 shadow-sm hover:shadow-md transition-shadow">
-                  <span className="hidden sm:inline">Add</span>
-                  <svg className="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
-                </AppSubmitButton>
-              </createForm.AppForm>
+              <div className="flex gap-2 sm:gap-3">
+                <createForm.AppField
+                  name="dueDate"
+                  children={() => (
+                    <AppTextField
+                      aria-label="Due date"
+                      type="date"
+                      className="flex-1 sm:w-[140px] sm:shrink-0"
+                    />
+                  )}
+                />
+                <createForm.AppForm>
+                  <AppSubmitButton className="h-11 px-5 sm:px-6 text-sm font-semibold rounded-xl shrink-0 shadow-sm hover:shadow-md transition-shadow uppercase tracking-wide whitespace-nowrap">
+                    <span className="hidden sm:inline">Add Task</span>
+                    <span className="sm:hidden">Add</span>
+                  </AppSubmitButton>
+                </createForm.AppForm>
+              </div>
             </form>
           </section>
 
@@ -463,41 +468,40 @@ function App() {
             style={{ animationDelay: "120ms" }}
           >
             {/* Filter pills */}
-            <div className="flex items-center gap-2 text-xs sm:text-sm">
-              <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-surface-strong/30">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 text-xs sm:text-sm">
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-surface-strong/40 shadow-sm">
                 {statusOptions.map((option) => (
                   <button
                     key={option.key}
                     type="button"
                     onClick={() => handleStatusChange(option.key)}
-                    className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 text-xs font-semibold rounded-lg transition-all uppercase tracking-wider ${
                       statusFilter === option.key
                         ? "bg-[color:var(--accent)] text-white shadow-md"
-                        : "text-muted hover:text-ink"
+                        : "text-muted hover:text-ink hover:bg-surface-strong/60"
                     }`}
                   >
                     {option.label}
                   </button>
                 ))}
               </div>
-              <div className="flex-1" />
-              <div className="flex items-center gap-2 py-1.5">
+              <div className="flex items-center gap-2">
                 <SearchField
                   aria-label="Search"
                   placeholder="Search..."
                   value={searchInput}
                   onChange={setSearchInput}
-                  className="w-28 sm:w-44"
+                  className="flex-1 sm:w-32 md:w-48"
                 />
                 <button
                   type="button"
                   onClick={refreshTodos}
                   disabled={loading}
-                  className="h-9 w-9 rounded-full flex items-center justify-center text-muted/50 hover:text-ink hover:bg-surface-strong/50 transition-colors"
+                  className="h-9 w-9 rounded-lg flex items-center justify-center text-muted/50 hover:text-ink hover:bg-surface-strong/60 transition-all shadow-sm hover:shadow disabled:opacity-50"
                   aria-label="Refresh"
                 >
                   {loading ? (
-                    <span className="h-3 w-3 animate-spin rounded-full border-[1.5px] border-current border-t-transparent" />
+                    <span className="h-4 w-4 animate-spin rounded-full border-[2px] border-current border-t-transparent" />
                   ) : (
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
@@ -509,26 +513,29 @@ function App() {
 
             {errorMessage && (
               <div
-                className="rounded-md border border-[color:var(--danger-border)] bg-[color:var(--danger-soft)] px-2.5 py-1.5 text-[0.7rem] text-[color:var(--danger)]"
+                className="rounded-lg border border-[color:var(--danger-border)] bg-[color:var(--danger-soft)] px-4 py-3 text-sm text-[color:var(--danger)] shadow-sm app-scale-in flex items-start gap-2"
                 role="alert"
               >
-                {errorMessage}
+                <svg className="h-5 w-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                <span className="flex-1 font-medium">{errorMessage}</span>
               </div>
             )}
 
             {loading ? (
-              <div className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-stroke/50 bg-surface-strong/30 px-4 py-10 text-center">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--accent)] border-t-transparent" />
-                <span className="text-sm text-muted">Loading...</span>
+              <div className="flex items-center justify-center gap-3 rounded-xl border border-dashed border-stroke/70 bg-surface-strong/30 px-4 py-12 text-center app-fade-in">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-[color:var(--accent)] border-t-transparent" />
+                <span className="text-sm font-medium text-ink/70">Loading tasks...</span>
               </div>
             ) : visibleTodos.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="w-12 h-12 mb-4 rounded-full bg-surface-strong/50 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <div className="flex flex-col items-center justify-center py-20 text-center app-fade-in">
+                <div className="w-16 h-16 mb-5 rounded-2xl bg-surface-strong/60 flex items-center justify-center shadow-sm">
+                  <svg className="w-8 h-8 text-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                   </svg>
                 </div>
-                <p className="text-sm font-medium text-ink/70 mb-1">
+                <p className="text-base font-semibold text-ink/80 mb-2">
                   {todos.length === 0
                     ? "No tasks yet"
                     : trimmedQuery
@@ -537,9 +544,9 @@ function App() {
                         ? "All done!"
                         : "Nothing completed"}
                 </p>
-                <p className="text-xs text-muted/60">
+                <p className="text-sm text-muted/60 max-w-xs">
                   {todos.length === 0
-                    ? "Add your first task above"
+                    ? "Add your first task above to get started"
                     : trimmedQuery
                       ? `Try a different search term`
                       : statusFilter === "open"
@@ -574,8 +581,8 @@ function App() {
                               : "text-muted/60";
 
                         dueBadge = (
-                          <span className={`text-xs tabular-nums ${badgeClass}`}>
-                            {isOverdue && "! "}
+                          <span className={`text-xs tabular-nums font-medium transition-colors ${badgeClass}`}>
+                            {isOverdue && "⚠️ "}
                             {formatDueDate(todo.dueDate)}
                           </span>
                         );
@@ -585,7 +592,7 @@ function App() {
                     return (
                       <GridListItem id={todo.id} key={todo.id} textValue={todo.title}>
                         <div
-                          className={`group flex w-full items-center gap-3 py-2.5 px-2 -mx-2 rounded-lg transition-all hover:bg-surface-strong/40 ${
+                          className={`group flex w-full items-center gap-3 py-3 px-3 -mx-3 rounded-xl transition-all hover:bg-surface-strong/50 hover:shadow-sm ${
                             isActive ? "opacity-50" : ""
                           }`}
                         >
@@ -600,22 +607,22 @@ function App() {
                             type="button"
                             onClick={() => !isActive && handleToggle(todo, !todo.isCompleted)}
                             disabled={isActive}
-                            className={`min-w-0 flex-1 text-left text-[0.875rem] leading-snug transition-all cursor-pointer hover:opacity-80 ${
-                              todo.isCompleted ? "text-muted/50 line-through decoration-muted/40 decoration-1" : "text-ink"
+                            className={`min-w-0 flex-1 text-left text-[0.9rem] leading-snug transition-all cursor-pointer hover:opacity-80 ${
+                              todo.isCompleted ? "text-muted/50 line-through decoration-muted/40 decoration-1" : "text-ink font-medium"
                             }`}
                           >
                             {todo.title}
                           </button>
                           {dueBadge}
-                          <div className="flex shrink-0 items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                          <div className="flex shrink-0 items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                             <button
                               type="button"
                               onClick={() => navigate({ to: `/todos/${todo.id}` })}
                               disabled={isActive}
-                              className="h-8 w-8 rounded flex items-center justify-center text-muted/30 hover:text-ink hover:bg-surface-strong/60 transition-colors"
+                              className="h-9 w-9 rounded-lg flex items-center justify-center text-muted/30 hover:text-ink hover:bg-surface-strong/70 transition-all shadow-sm hover:shadow"
                               aria-label="Edit"
                             >
-                              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
                               </svg>
                             </button>
@@ -623,10 +630,10 @@ function App() {
                               type="button"
                               onClick={() => handleDelete(todo.id)}
                               disabled={isActive}
-                              className="h-8 w-8 rounded flex items-center justify-center text-muted/30 hover:text-[color:var(--danger)] hover:bg-[color:var(--danger-soft)] transition-colors"
+                              className="h-9 w-9 rounded-lg flex items-center justify-center text-muted/30 hover:text-[color:var(--danger)] hover:bg-[color:var(--danger-soft)] transition-all shadow-sm hover:shadow"
                               aria-label="Delete"
                             >
-                              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                               </svg>
                             </button>

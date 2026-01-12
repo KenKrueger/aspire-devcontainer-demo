@@ -23,7 +23,7 @@ export function Label(props: LabelProps) {
     <RACLabel
       {...props}
       className={twMerge(
-        "font-body text-[0.7rem] text-muted font-medium cursor-default w-fit",
+        "font-body text-[0.75rem] text-ink/80 font-medium cursor-default w-fit uppercase tracking-wider",
         props.className,
       )}
     />
@@ -35,7 +35,7 @@ export function Description(props: TextProps) {
     <Text
       {...props}
       slot="description"
-      className={twMerge("text-xs text-muted", props.className)}
+      className={twMerge("text-[0.7rem] text-muted/70 mt-0.5", props.className)}
     />
   );
 }
