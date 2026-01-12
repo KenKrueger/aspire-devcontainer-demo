@@ -334,13 +334,13 @@ function App() {
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-4 sm:gap-5 sm:px-8 sm:py-8">
         <header className="relative z-20 flex items-center justify-between app-rise" style={{ animationDelay: "60ms" }}>
           <div className="flex flex-col">
-            <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-ink">
+            <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-ink">
               Tasks
             </h1>
-            <span className="text-[0.65rem] text-muted/60 tracking-widest uppercase font-medium">{todayLabel}</span>
+            <span className="text-[0.6rem] sm:text-[0.65rem] text-muted/60 tracking-widest uppercase font-medium">{todayLabel}</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className={`text-[0.65rem] uppercase tracking-widest font-semibold px-3 py-1.5 rounded-full shadow-sm ${
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className={`text-[0.6rem] sm:text-[0.65rem] uppercase tracking-widest font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-sm ${
               remainingCount === 0 
                 ? "bg-[color:var(--success-soft)] text-[color:var(--success)]"
                 : overdueCount > 0
@@ -355,7 +355,7 @@ function App() {
               <button
                 type="button"
                 onClick={() => setSettingsOpen(!settingsOpen)}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted/50 transition-all hover:text-muted hover:bg-surface-strong/50 shadow-sm hover:shadow"
+                className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg text-muted/50 transition-all hover:text-muted hover:bg-surface-strong/50 shadow-sm hover:shadow"
                 aria-label="Settings"
                 aria-expanded={settingsOpen}
               >
@@ -420,7 +420,7 @@ function App() {
           {/* Compose form */}
           <section className="app-rise" style={{ animationDelay: "100ms" }}>
             <form
-              className="flex gap-3 items-center p-4 -mx-3 rounded-2xl bg-surface border border-stroke/40 shadow-sm hover:shadow-md transition-shadow"
+              className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center p-3 sm:p-4 -mx-3 rounded-xl sm:rounded-2xl bg-surface border border-stroke/40 shadow-sm hover:shadow-md transition-shadow"
               onSubmit={(e) => {
                 e.preventDefault();
                 createForm.handleSubmit();
@@ -436,24 +436,24 @@ function App() {
                   />
                 )}
               />
-              <createForm.AppField
-                name="dueDate"
-                children={() => (
-                  <AppTextField
-                    aria-label="Due date"
-                    type="date"
-                    className="w-[140px] shrink-0 hidden sm:block"
-                  />
-                )}
-              />
-              <createForm.AppForm>
-                <AppSubmitButton className="h-11 px-6 text-sm font-semibold rounded-xl shrink-0 shadow-sm hover:shadow-md transition-shadow uppercase tracking-wide">
-                  <span className="hidden sm:inline">Add Task</span>
-                  <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
-                </AppSubmitButton>
-              </createForm.AppForm>
+              <div className="flex gap-2 sm:gap-3">
+                <createForm.AppField
+                  name="dueDate"
+                  children={() => (
+                    <AppTextField
+                      aria-label="Due date"
+                      type="date"
+                      className="flex-1 sm:w-[140px] sm:shrink-0"
+                    />
+                  )}
+                />
+                <createForm.AppForm>
+                  <AppSubmitButton className="h-11 px-5 sm:px-6 text-sm font-semibold rounded-xl shrink-0 shadow-sm hover:shadow-md transition-shadow uppercase tracking-wide whitespace-nowrap">
+                    <span className="hidden sm:inline">Add Task</span>
+                    <span className="sm:hidden">Add</span>
+                  </AppSubmitButton>
+                </createForm.AppForm>
+              </div>
             </form>
           </section>
 
@@ -463,14 +463,14 @@ function App() {
             style={{ animationDelay: "120ms" }}
           >
             {/* Filter pills */}
-            <div className="flex items-center gap-3 text-xs sm:text-sm">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 text-xs sm:text-sm">
               <div className="flex items-center gap-1 p-1 rounded-xl bg-surface-strong/40 shadow-sm">
                 {statusOptions.map((option) => (
                   <button
                     key={option.key}
                     type="button"
                     onClick={() => handleStatusChange(option.key)}
-                    className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all uppercase tracking-wider ${
+                    className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 text-xs font-semibold rounded-lg transition-all uppercase tracking-wider ${
                       statusFilter === option.key
                         ? "bg-[color:var(--accent)] text-white shadow-md"
                         : "text-muted hover:text-ink hover:bg-surface-strong/60"
@@ -480,14 +480,13 @@ function App() {
                   </button>
                 ))}
               </div>
-              <div className="flex-1" />
-              <div className="flex items-center gap-2 py-1.5">
+              <div className="flex items-center gap-2">
                 <SearchField
                   aria-label="Search"
                   placeholder="Search..."
                   value={searchInput}
                   onChange={setSearchInput}
-                  className="w-32 sm:w-48"
+                  className="flex-1 sm:w-32 md:w-48"
                 />
                 <button
                   type="button"
