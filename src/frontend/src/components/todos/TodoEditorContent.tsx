@@ -245,7 +245,7 @@ export function TodoEditorContent({ id, onClose, onSaved }: TodoEditorContentPro
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="flex items-start justify-between gap-4 pb-3 border-b border-stroke/30">
+      <header className="flex items-start justify-between gap-4 pb-3 border-b border-stroke/30 app-fade-in" style={{ animationDelay: "50ms" }}>
         <div className="flex-1 min-w-0">
           <p className="text-[0.65rem] uppercase tracking-[0.35em] text-muted/60 mb-1 font-medium">Edit Task</p>
           <h2 id="todo-editor-title" className="font-display text-2xl sm:text-3xl font-semibold text-ink tracking-tight line-clamp-2">
@@ -273,7 +273,7 @@ export function TodoEditorContent({ id, onClose, onSaved }: TodoEditorContentPro
       >
         {saveError && (
           <div
-            className="rounded-lg border border-[color:var(--danger-border)] bg-[color:var(--danger-soft)] px-4 py-3 text-sm text-[color:var(--danger)] shadow-tight"
+            className="rounded-lg border border-[color:var(--danger-border)] bg-[color:var(--danger-soft)] px-4 py-3 text-sm text-[color:var(--danger)] shadow-tight app-scale-in"
             role="alert"
             aria-live="assertive"
           >
@@ -281,7 +281,7 @@ export function TodoEditorContent({ id, onClose, onSaved }: TodoEditorContentPro
           </div>
         )}
 
-        <div className="flex flex-wrap items-center gap-2 text-[0.6rem] uppercase tracking-[0.25em] font-medium">
+        <div className="flex flex-wrap items-center gap-2 text-[0.6rem] uppercase tracking-[0.25em] font-medium app-fade-in" style={{ animationDelay: "100ms" }}>
           <span className={`rounded-full border px-3 py-1 ${statusChipClass}`}>
             {todo.isCompleted ? "Done" : "Open"}
           </span>
@@ -307,7 +307,7 @@ export function TodoEditorContent({ id, onClose, onSaved }: TodoEditorContentPro
           </span>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 app-fade-in" style={{ animationDelay: "150ms" }}>
           <editForm.AppField
             name="title"
             children={() => (
@@ -352,7 +352,7 @@ export function TodoEditorContent({ id, onClose, onSaved }: TodoEditorContentPro
           </div>
         </div>
 
-        <div className="flex items-center gap-3 pt-4 border-t border-stroke/30">
+        <div className="flex items-center gap-3 pt-4 border-t border-stroke/30 app-fade-in" style={{ animationDelay: "200ms" }}>
           <Button
             variant="secondary"
             onPress={() => editForm.reset(toEditValues(todo))}
